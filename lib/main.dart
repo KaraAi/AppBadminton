@@ -11,6 +11,9 @@ import 'package:badminton_management_1/bbcontroll/state/list_student_provider.da
 import 'package:badminton_management_1/bbcontroll/state/list_tuitions_provider.dart';
 import 'package:badminton_management_1/ccui/ccauth/first_view.dart';
 import 'package:badminton_management_1/ccui/ccresource/app_colors.dart';
+import 'package:badminton_management_1/firebase_options.dart';
+import 'package:badminton_management_1/notification/fcm_controller.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,9 +33,12 @@ void main() async {
         await rootBundle.loadString('google_fonts/Roboto/LICENSE.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
-  // await FCMController().initToState().catchError((error) {
-  //   print("Error initializing FCMController: $error");
-  // });
+await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+);
+  await FCMController().initToState().catchError((error) {
+    print("Error initializing FCMController: $error");
+  });
   HttpOverrides.global = MyHttpOverrides();
 
   runApp(MainApp());
