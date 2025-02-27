@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBAomu9vih0YB5-KgauGzsTzz9xoS6qeQc',
-    appId: '1:1025466942289:android:c4a2456ed9edc739aac970',
+    appId: '1:1025466942289:android:d1039b700fa8be51aac970',
     messagingSenderId: '1025466942289',
     projectId: 'davidbadminton',
     storageBucket: 'davidbadminton.firebasestorage.app',
@@ -59,11 +59,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyB1nctgWsAJstKVULoqAgZbMgRHOec5cnc',
-    appId: '1:1025466942289:ios:259ea86038c894c4aac970',
+    appId: '1:1025466942289:ios:094a9198675b05e2aac970',
     messagingSenderId: '1025466942289',
     projectId: 'davidbadminton',
     storageBucket: 'davidbadminton.firebasestorage.app',
-    iosBundleId: 'com.example.badmintonManagement1',
+    iosBundleId: 'com.quocbaosoftware.CoachDavidBadminton',
   );
 
 }

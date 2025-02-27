@@ -1,4 +1,4 @@
-package com.example.badminton_management_1
+package com.quocbaosoftware.CoachDavidBadminton
 
 import io.flutter.embedding.android.FlutterActivity
 

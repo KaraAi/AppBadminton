@@ -38,8 +38,9 @@ class FCMController extends GetxController {
     // fcmSubscribeToAPI(fcmToken ?? '');
     print('[FCM Firebase Token]  $fcmToken');
     await fcmSubscribeToTopic();
-    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) async {
       _handleMessage(event, FcmMessageAction.showModal, FCMType.foreground);
+
     });
 
     ///give you the message on which users taps
@@ -126,7 +127,7 @@ class FCMController extends GetxController {
   Future<void> setupFlutterNotifications() async {
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: false,
+      alert: true,
       badge: true,
       sound: true,
     );
@@ -232,7 +233,11 @@ class FCMController extends GetxController {
             icon: 'ic_launcher',
             largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
           ),
-          iOS: const DarwinNotificationDetails(presentSound: true),
+         iOS: const DarwinNotificationDetails(
+          presentAlert: true,  // Hiển thị alert trên iOS
+          presentBadge: true,  // Hiển thị badge trên icon
+          presentSound: true,  // Phát âm thanh
+        ),
         ),
         payload: message.data.notificationItemId,
       );

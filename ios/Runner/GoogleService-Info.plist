@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.badmintonManagement1</string>
+	<string>com.quocbaosoftware.CoachDavidBadminton</string>
 	<key>PROJECT_ID</key>
 	<string>davidbadminton</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1025466942289:ios:259ea86038c894c4aac970</string>
+	<string>1:1025466942289:ios:094a9198675b05e2aac970</string>
 </dict>
 </plist>
