@@ -67,8 +67,11 @@ class StudentStrategy implements UserTypeStrategy {
   Future<bool> updatePassword(BuildContext context, String password) async{
     try{
       String hashPass = hashPassword(password);
+      print("Mật khẩu sau khi băm: $hashPass");
       List<Map<String, dynamic>> lst = [{"key": "Password", "value": hashPass}];
+      print("Gọi API cập nhật mật khẩu cho userId: ${currentUser.id}");
       bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, lst);
+      print("Kết quả cập nhật mật khẩu từ API: $isUpdate");
       return isUpdate;
     }
     catch(e){

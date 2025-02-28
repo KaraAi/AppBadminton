@@ -32,22 +32,39 @@ class AuthControll{
     );
   }
 
-  // Handle login user type
-  Future<void> handleLogin(BuildContext context, {required MyUser user}) async{
+  Future<bool> handleLogin(BuildContext context, {required MyUser user}) async {
+  bool isLogin = await UserTypeContext.login(user);
 
-    bool isLogin = await UserTypeContext.login(user);
+  await messageHandler.handleAction(
+    context,
+    () async => isLogin,
+    "success_login",
+    "error_emailpass",
+  );
 
-    await messageHandler.handleAction(
-      context,
-      () async => isLogin,
-      "success_login", 
-      "error_emailpass",
-    );
-
-    if (isLogin) {
-      UserTypeContext.navigateReplacement(context, "/home");
-    }
+  if (isLogin) {
+    UserTypeContext.navigateReplacement(context, "/home");
   }
+
+  return isLogin; // Thêm return để có giá trị trả về
+}
+
+  // Handle login user type
+  // Future<void> handleLogin(BuildContext context, {required MyUser user}) async{
+
+  //   bool isLogin = await UserTypeContext.login(user);
+
+  //   await messageHandler.handleAction(
+  //     context,
+  //     () async => isLogin,
+  //     "success_login", 
+  //     "error_emailpass",
+  //   );
+
+  //   if (isLogin) {
+  //     UserTypeContext.navigateReplacement(context, "/home");
+  //   }
+  // }
 
   // Handle update birthday student / coach
   Future<void> handleUpdateBirthday(BuildContext context, String birthday) async{
@@ -80,19 +97,6 @@ class AuthControll{
         return;
       }
       else{
-        // bool isDublicate = await UserTypeContext.checkDublicatePhone(phone);
-        // if(isDublicate){
-        //   AppMessage.showAlert(
-        //     context: context, 
-        //     type: QuickAlertType.error, 
-        //     message: AppLocalizations.of(context).translate("error_dublicate_phone")
-        //   );
-        //   return;
-        // }
-        // else{
-          
-        // }
-
         bool isUpdate = await UserTypeContext.updatePhone(context, phone);
         if(isUpdate){
           AppMessage.showAlert(
@@ -106,7 +110,7 @@ class AuthControll{
         else{
           AppMessage.showAlert(
             context: context, 
-            type: QuickAlertType.success, 
+            type: QuickAlertType.error, 
             message: AppLocalizations.of(context).translate("error_update")
           );
           return;
@@ -170,7 +174,7 @@ class AuthControll{
           else{
             AppMessage.showAlert(
               context: context, 
-              type: QuickAlertType.success, 
+              type: QuickAlertType.error, 
               message: AppLocalizations.of(context).translate("error_update")
             );
             return;
@@ -190,33 +194,64 @@ class AuthControll{
   }
 
   // Handle update password student / password
-  Future<void> handleUpdatePassword(BuildContext context, String password, String confirmPassword) async{
-    try{
-      if(password!=confirmPassword || password=="" || confirmPassword==""){
-        AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_notsame_password"));
-        return;
-      }
-      else if (!_isPasswordStrong(password)) {
-        AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_weak_password"));
-        return;
-      }
-      else{
-        bool isUpdate = await UserTypeContext.updatePassword(context, password);
+  // Future<void> handleUpdatePassword(BuildContext context, String password, String confirmPassword) async{
+  //   try{
+  //     if(password!=confirmPassword || password=="" || confirmPassword==""){
+  //       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_notsame_password"));
+  //       return;
+  //     }
+  //     else if (!_isPasswordStrong(password)) {
+  //       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_weak_password"));
+  //       return;
+  //     }
+  //     else{
+  //       bool isUpdate = await UserTypeContext.updatePassword(context, password);
         
-        await messageHandler.handleAction(
-          context,
-          () async => isUpdate,
-          "success_update",
-          "error_update",
-        );
-      }
-    }
-    catch(e){
-      log("$e");
-      AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
-    }
-  }
+  //       await messageHandler.handleAction(
+  //         context,
+  //         () async => isUpdate,
+  //         "success_update",
+  //         "error_update",
+  //       );
+  //     }
+  //   }
+  //   catch(e){
+  //     log("$e");
+  //     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
+  //   }
+  // }
 
+Future<void> handleUpdatePassword(BuildContext context, String password, String confirmPassword) async {
+  try {
+    if (password != confirmPassword || password.isEmpty || confirmPassword.isEmpty) {
+      AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_notsame_password"));
+      return;
+    } else if (!_isPasswordStrong(password)) {
+      AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_weak_password"));
+      return;
+    } else {
+      log("Bắt đầu cập nhật mật khẩu...");
+
+      bool isUpdate = await UserTypeContext.updatePassword(context, password);
+      log("Kết quả cập nhật mật khẩu: $isUpdate");
+
+      if (!isUpdate) {
+        AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_update"));
+        return;
+      }
+
+      await messageHandler.handleAction(
+        context,
+        () async => true, // Đảm bảo chỉ thực thi khi cập nhật thành công
+        "success_update",
+        "error_update",
+      );
+    }
+  } catch (e) {
+    log("Lỗi khi cập nhật mật khẩu: $e");
+    AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
+  }
+}
   // Check password strong
   bool _isPasswordStrong(String password) {
     final hasUppercase = password.contains(RegExp(r'[A-Z]'));

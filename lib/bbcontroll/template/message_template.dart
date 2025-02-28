@@ -8,7 +8,27 @@ import 'package:flutter/material.dart';
 
 class MessageHandler {
 
-  Future<void> handleAction(
+  // Future<void> handleAction(
+  //   BuildContext context,
+  //   Future<bool> Function() action,
+  //   String successMessageKey,
+  //   String errorMessageKey,
+  // ) async {
+  //   try {
+  //     bool isSuccess = await action();
+
+  //     if (isSuccess) {
+  //       AppMessage.successMessage(context, AppLocalizations.of(context).translate(successMessageKey));
+  //     } else {
+  //       AppMessage.errorMessage(context, AppLocalizations.of(context).translate(errorMessageKey));
+  //     }
+  //   } catch (e) {
+  //     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
+  //     log("Error: $e");
+  //   }
+  // }
+  
+  Future<bool> handleAction(
     BuildContext context,
     Future<bool> Function() action,
     String successMessageKey,
@@ -22,10 +42,12 @@ class MessageHandler {
       } else {
         AppMessage.errorMessage(context, AppLocalizations.of(context).translate(errorMessageKey));
       }
+
+      return isSuccess; // Trả về kết quả thành công hay thất bại
     } catch (e) {
       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
       log("Error: $e");
+      return false; // Trả về false nếu có lỗi
     }
   }
-
 }

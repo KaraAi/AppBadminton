@@ -2,6 +2,7 @@
 
 import 'package:badminton_management_1/bbcontroll/firstview_controll.dart';
 import 'package:badminton_management_1/bbcontroll/strategy/user_coach_type.dart';
+import 'package:badminton_management_1/bbcontroll/strategy/user_student_type.dart';
 import 'package:badminton_management_1/bbcontroll/strategy/user_type.dart';
 import 'package:badminton_management_1/bbdata/aamodel/my_user.dart';
 import 'package:badminton_management_1/ccui/ccresource/app_colors.dart';
@@ -23,8 +24,8 @@ class _FirstView extends State<FirstView> {
 
   @override
   void initState() {
-    //userTypeStrategy = StudentStrategy();
-    userTypeStrategy = CoachStrategy();
+    userTypeStrategy = StudentStrategy();
+    //userTypeStrategy = CoachStrategy();
     super.initState();
   }
 

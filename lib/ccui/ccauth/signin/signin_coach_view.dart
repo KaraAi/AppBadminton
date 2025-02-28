@@ -4,6 +4,8 @@ import 'package:badminton_management_1/bbdata/aamodel/my_user.dart';
 import 'package:badminton_management_1/ccui/ccresource/app_colors.dart';
 import 'package:badminton_management_1/ccui/ccresource/app_mainsize.dart';
 import 'package:badminton_management_1/ccui/ccresource/app_textstyle.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class SignInCoachView extends StatefulWidget {
@@ -160,37 +162,99 @@ class _SignInView extends State<SignInCoachView> {
               labelStyle: AppTextstyle.contentBlackSmallStyle),
         ));
   }
+bool isLoading = false;
 
-  bool isLoading = false;
-  Widget _button(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        setState(() {
-          isLoading = true;
-        });
+Widget _button(BuildContext context) {
+  return GestureDetector(
+    onTap: () async {
+      setState(() {
+        isLoading = true;
+      });
 
-        await AuthControll().handleLogin(context,
-            user: MyUser(
-                email: widget.textController.text,
-                password: widget.passController.text));
+      MyUser user = MyUser(
+        email: widget.textController.text,
+        password: widget.passController.text,
+      );
 
-        setState(() {
-          isLoading = false;
-        });
-      },
-      child: Container(
-        width: AppMainsize.mainWidth(context) - 100,
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-            color: AppColors.primary, borderRadius: BorderRadius.circular(20)),
-        child: Center(
-            child: isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : Text(
-                    "Đăng Nhập",
-                    style: AppTextstyle.subWhiteTitleStyle,
-                  )),
+      bool loginSuccess = await AuthControll().handleLogin(context, user: user);
+      if (loginSuccess) {
+        // Gán giá trị từ MyCurrentUser để đảm bảo có dữ liệu
+        user.id = MyCurrentUser().id;
+        user.userTypeId = MyCurrentUser().userTypeId;
+        user.username = MyCurrentUser().username; // Thêm CoachName
+
+        String? fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.username) // Dùng CoachName làm ID
+              .set({
+                'fcm_token': fcmToken,
+                'userID': user.id ?? "null",
+                'typeUserID': user.userTypeId ?? "null",
+              }, SetOptions(merge: true));
+
+          print("Firebase cập nhật thành công!");
+        } else {
+          print("Không lấy được FCM token");
+        }
+      } else {
+        print("Đăng nhập thất bại");
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    },
+    child: Container(
+      width: AppMainsize.mainWidth(context) - 100,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20),
       ),
-    );
-  }
+      child: Center(
+        child: isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(
+                "Đăng Nhập",
+                style: AppTextstyle.subWhiteTitleStyle,
+              ),
+      ),
+    ),
+  );
+}
+
+  // bool isLoading = false;
+  // Widget _button(BuildContext context) {
+  //   return GestureDetector(
+  //     onTap: () async {
+  //       setState(() {
+  //         isLoading = true;
+  //       });
+
+  //       await AuthControll().handleLogin(context,
+  //           user: MyUser(
+  //               email: widget.textController.text,
+  //               password: widget.passController.text));
+
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     },
+  //     child: Container(
+  //       width: AppMainsize.mainWidth(context) - 100,
+  //       padding: const EdgeInsets.all(15),
+  //       decoration: BoxDecoration(
+  //           color: AppColors.primary, borderRadius: BorderRadius.circular(20)),
+  //       child: Center(
+  //           child: isLoading
+  //               ? const CircularProgressIndicator(color: Colors.white)
+  //               : Text(
+  //                   "Đăng Nhập",
+  //                   style: AppTextstyle.subWhiteTitleStyle,
+  //                 )),
+  //     ),
+  //   );
+  // }
 }

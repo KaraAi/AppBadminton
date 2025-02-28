@@ -1,0 +1,2 @@
+/Users/aikara/AppBadminton/android/app/.cxx/Debug/5m484d2y/x86/CMakeFiles/edit_cache.dir
+/Users/aikara/AppBadminton/android/app/.cxx/Debug/5m484d2y/x86/CMakeFiles/rebuild_cache.dir

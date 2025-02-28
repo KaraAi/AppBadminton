@@ -1,5 +1,5 @@
 class MyStudent {
-  String? id, studentName, phone, password, album;
+  String? id,typeUserID, studentName, phone, password, album;
   String? timeId, images, gender, birthday, email, statusId = "1";
   String? isCheck;
   bool isSavedRollCall = false;
@@ -8,6 +8,7 @@ class MyStudent {
 
   MyStudent(
       {this.id,
+      this.typeUserID,
       this.studentName,
       phone,
       password,
@@ -21,6 +22,7 @@ class MyStudent {
 
   MyStudent.fromJson(Map<dynamic, dynamic> e) {
     id = e["studentId"].toString();
+    typeUserID=e["typeUserID"].toString();
     timeId = e["timeId"].toString();
     studentName = e["studentName"].toString();
     album = e["album"].toString();
@@ -36,6 +38,7 @@ class MyStudent {
   Map<String, dynamic> toMapSqlite() {
     return {
       'studentId': id,
+      'typeUserID':typeUserID,
       'studentName': studentName,
       'album': album,
       'phone': phone,

@@ -38,7 +38,11 @@ class FCMController extends GetxController {
     // fcmSubscribeToAPI(fcmToken ?? '');
     print('[FCM Firebase Token]  $fcmToken');
     await fcmSubscribeToTopic();
+<<<<<<< HEAD
     FirebaseMessaging.onMessage.listen((RemoteMessage event) async {
+=======
+      FirebaseMessaging.onMessage.listen((RemoteMessage event) async {
+>>>>>>> aad0ed6 (update token  firebase for student and coach)
       _handleMessage(event, FcmMessageAction.showModal, FCMType.foreground);
 
     });
@@ -89,7 +93,7 @@ class FCMController extends GetxController {
       print(
           '[FCM] - Permission Notification: User declined or has not accepted permission');
       await _firebaseMessaging.requestPermission(
-        alert: false,
+        alert: true,
         badge: true,
         sound: true,
       );
@@ -233,7 +237,11 @@ class FCMController extends GetxController {
             icon: 'ic_launcher',
             largeIcon: const DrawableResourceAndroidBitmap('ic_launcher'),
           ),
+<<<<<<< HEAD
          iOS: const DarwinNotificationDetails(
+=======
+             iOS: const DarwinNotificationDetails(
+>>>>>>> aad0ed6 (update token  firebase for student and coach)
           presentAlert: true,  // Hiển thị alert trên iOS
           presentBadge: true,  // Hiển thị badge trên icon
           presentSound: true,  // Phát âm thanh

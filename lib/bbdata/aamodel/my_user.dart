@@ -37,7 +37,6 @@ class MyUser {
     } else {
       id = e["coachId"].toString();
     }
-
     email = e["email"].toString();
     password = e["password"].toString();
     username = (e["coachName"] ?? e["studentName"]).toString();

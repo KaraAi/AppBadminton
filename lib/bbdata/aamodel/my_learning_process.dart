@@ -24,7 +24,7 @@ class MyLearningProcess{
 
   MyLearningProcess.fromJson(Map<dynamic, dynamic> e){
     id = e["learningProcessId"].toString();
-    studentId = e["studentId"].toString();
+    studentId = e["studentId"]?.toString();
     title = e["title"].toString();
     comment = e["comment"].toString();
     isPublish = e["isPublish"].toString();
