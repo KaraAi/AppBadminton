@@ -79,24 +79,51 @@ class CoachApi{
     }
   }
   
-  Future<bool> updateByCoachId(String coachId, List<Map<String, dynamic>> fields) async{
-    try{ 
-      final body = {
-        for (var field in fields) field['key']: field['value']
-      };
+  // Future<bool> updateByCoachId(String coachId, List<Map<String, dynamic>> fields) async{
+  //   try{ 
+  //     final body = {
+  //       for (var field in fields) field['key']: field['value']
+  //     };
 
-      final res = await http.put(
-        Uri.parse("$baseUrl/${dotenv.env["COACHS_URL"]}/coachId/$coachId"),
-        headers: {"Authorization": "Bearer ${currentUser.key}", "Content-Type": "application/json"},
-        body: jsonEncode(body)
-      ).timeout(const Duration(seconds: 30));
+  //     final res = await http.put(
+  //       Uri.parse("$baseUrl/${dotenv.env["COACHS_URL"]}/coachId/$coachId"),
+  //       headers: {"Authorization": "Bearer ${currentUser.key}", "Content-Type": "application/json"},
+  //       body: jsonEncode(body)
+  //     ).timeout(const Duration(seconds: 30));
 
-      return res.statusCode==204;
+  //     return res.statusCode==204;
+  //   }
+  //   catch(e){
+  //     log("$e");
+  //     return false;
+  //   }
+  // }
+Future<bool> updateByCoachId(String coachId, Map<String, dynamic> updateFields) async {
+  try {
+    String url = "http://api.davidbadminton.com/api/Coachs/coachId/$coachId";
+    print("🔍 Gọi API PATCH: $url");
+
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer ${currentUser.key}",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(updateFields),  // 🛠 Gửi dữ liệu trực tiếp
+    );
+
+    print("📩 Phản hồi từ API: ${response.statusCode} - ${response.body}");
+
+    if (response.statusCode == 400) {
+      print("⚠️ API từ chối dữ liệu, kiểm tra lại format!");
+    } else if (response.statusCode == 404) {
+      print("❌ Không tìm thấy sinh viên với ID: $coachId");
     }
-    catch(e){
-      log("$e");
-      return false;
-    }
+
+     return response.statusCode == 200 || response.statusCode == 204; 
+  } catch (e) {
+    print("❌ Lỗi khi gửi request PATCH: $e");
+    return false;
   }
-
+}
 }

@@ -53,7 +53,8 @@ class StudentStrategy implements UserTypeStrategy {
   @override
   Future<bool> updateBirthDay(BuildContext context, String birthday) async{
     try{
-      List<Map<String, dynamic>> lst = [{"key": "Birthday", "value": birthday}];
+      Map<String, dynamic> lst = {"Birthday":birthday
+    };
       bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, lst);
       return isUpdate;
     }
@@ -68,7 +69,8 @@ class StudentStrategy implements UserTypeStrategy {
     try{
       String hashPass = hashPassword(password);
       print("Mật khẩu sau khi băm: $hashPass");
-      List<Map<String, dynamic>> lst = [{"key": "Password", "value": hashPass}];
+      Map<String, dynamic> lst = {"Password":hashPass
+    };
       print("Gọi API cập nhật mật khẩu cho userId: ${currentUser.id}");
       bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, lst);
       print("Kết quả cập nhật mật khẩu từ API: $isUpdate");
@@ -81,22 +83,35 @@ class StudentStrategy implements UserTypeStrategy {
   }
   
   @override
-  Future<bool> updateEmail(BuildContext context, String email) async{
-    try{
-      List<Map<String, dynamic>> lst = [{"key": "Email", "value": email}];
-      bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, lst);
-      return isUpdate;
-    }
-    catch(e){
-      AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
-      return false;
-    }
+  // Future<bool> updateEmail(BuildContext context, String email) async{
+  //   try{
+  //     List<Map<String, dynamic>> lst = [{"key": "Email", "value": email}];
+  //     bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, lst);
+  //     return isUpdate;
+  //   }
+  //   catch(e){
+  //     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
+  //     return false;
+  //   }
+  // }
+  Future<bool> updateEmail(BuildContext context, String email) async {
+  try {
+    Map<String, dynamic> updateData = {
+       "email": email  
+    };
+
+    bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, updateData);
+    return isUpdate;
+  } catch (e) {
+    AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
+    return false;
   }
-  
+}
   @override
   Future<bool> updatePhone(BuildContext context, String phone) async{
     try{
-      List<Map<String, dynamic>> lst = [{"key": "Phone", "value": phone}];
+      Map<String, dynamic> lst = {"phone":phone
+    };
       bool isUpdate = await StudentApi().updateByStudentId(currentUser.id!, lst);
       return isUpdate;
     }

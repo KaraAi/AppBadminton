@@ -50,7 +50,7 @@ class CoachStrategy implements UserTypeStrategy {
   @override
   Future<bool> updateBirthDay(BuildContext context, String birthday) async{
     try{
-      List<Map<String, dynamic>> lst = [{"key": "Birthday", "value": birthday}];
+      Map<String, dynamic> lst = {"Birthday":birthday};
       bool isUpdate = await CoachApi().updateByCoachId(currentUser.id!, lst);
       return isUpdate;
     }
@@ -64,7 +64,7 @@ class CoachStrategy implements UserTypeStrategy {
   Future<bool> updatePassword(BuildContext context, String password) async{
     try{
       String hashPass = hashPassword(password);
-      List<Map<String, dynamic>> lst = [{"key": "Password", "value": hashPass}];
+      Map<String, dynamic> lst = {"PassWord":hashPass};
       bool isUpdate = await CoachApi().updateByCoachId(currentUser.id!, lst);
       return isUpdate;
     }
@@ -77,7 +77,7 @@ class CoachStrategy implements UserTypeStrategy {
   @override
   Future<bool> updateEmail(BuildContext context, String email) async{
     try{
-      List<Map<String, dynamic>> lst = [{"key": "Email", "value": email}];
+      Map<String, dynamic> lst = {"Email":email};
       bool isUpdate = await CoachApi().updateByCoachId(currentUser.id!, lst);
       return isUpdate;
     }
@@ -90,7 +90,7 @@ class CoachStrategy implements UserTypeStrategy {
   @override
   Future<bool> updatePhone(BuildContext context, String phone) async{
     try{
-      List<Map<String, dynamic>> lst = [{"key": "Phone", "value": phone}];
+      Map<String, dynamic> lst = {"Phone":phone};
       bool isUpdate = await CoachApi().updateByCoachId(currentUser.id!, lst);
       return isUpdate;
     }

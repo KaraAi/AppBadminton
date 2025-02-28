@@ -57,47 +57,36 @@ class StudentApi{
       return [];
     }
   }
-
-  // Future<bool> updateByStudentId(String studentId, List<Map<String, dynamic>> fields) async{
-  //   try{ 
-  //     final body = {
-  //       for (var field in fields) field['key']: field['value']
-  //     };
-
-  //     final res = await http.put(
-  //       Uri.parse("$baseUrl/${dotenv.env["STUDENT_URL"]}/studentId/$studentId"),
-  //       headers: {"Authorization": "Bearer ${currentUser.key}", "Content-Type": "application/json"},
-  //       body: jsonEncode(body)
-  //     ).timeout(const Duration(seconds: 30));
-
-  //     return res.statusCode==204;
-  //   }
-  //   catch(e){
-  //     log("$e");
-  //     return false;
-  //   }
-  // }
-  Future<bool> updateByStudentId(String studentId, List<Map<String, dynamic>> lst) async {
+Future<bool> updateByStudentId(String studentId, Map<String, dynamic> updateFields) async {
   try {
-    print("Dữ liệu gửi lên API: ${jsonEncode(lst)}");
+    String url = "http://api.davidbadminton.com/api/Students/studentId/$studentId";
+    print("🔍 Gọi API PATCH: $url");
 
-    final response = await http.put(
-      Uri.parse("$baseUrl/update-student/$studentId"),
+    final response = await http.patch(
+      Uri.parse(url),
       headers: {
         "Authorization": "Bearer ${currentUser.key}",
         "Content-Type": "application/json",
       },
-      body: jsonEncode(lst),
+      body: jsonEncode(updateFields),  // 🛠 Gửi dữ liệu trực tiếp
     );
 
-    print("Phản hồi từ API: ${response.statusCode} - ${response.body}");
+    print("📩 Phản hồi từ API: ${response.statusCode} - ${response.body}");
 
-    return response.statusCode == 200;
+    if (response.statusCode == 400) {
+      print("⚠️ API từ chối dữ liệu, kiểm tra lại format!");
+    } else if (response.statusCode == 404) {
+      print("❌ Không tìm thấy sinh viên với ID: $studentId");
+    }
+
+     return response.statusCode == 200 || response.statusCode == 204; 
   } catch (e) {
-    print("Lỗi khi gửi request cập nhật: $e");
+    print("❌ Lỗi khi gửi request PATCH: $e");
     return false;
   }
 }
+
+
 
   Future<MyStudent> getStudentByPhone(String phone) async{
     try{
