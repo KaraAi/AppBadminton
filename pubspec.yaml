@@ -43,6 +43,9 @@ dependencies:
   firebase_messaging: ^15.2.3
   firebase_core: ^3.12.0
   cloud_firestore: ^5.6.5
+  googleapis: ^12.0.0
+  googleapis_auth: ^1.4.0
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -64,3 +67,4 @@ flutter:
     - assets/lang/
     - assets/slide_img/
     - google_fonts/Roboto/
+    - assets/service-account.json

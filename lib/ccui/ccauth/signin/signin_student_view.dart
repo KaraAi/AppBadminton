@@ -103,7 +103,7 @@ if (loginSuccess) {
   // Gán dữ liệu từ MyCurrentUser để đảm bảo có giá trị
   user.id = MyCurrentUser().id;
   user.userTypeId = MyCurrentUser().userTypeId;
-
+  user.username = MyCurrentUser().username;
   String? fcmToken = await FirebaseMessaging.instance.getToken();
   if (fcmToken != null) {
     await FirebaseFirestore.instance
@@ -113,6 +113,7 @@ if (loginSuccess) {
           'fcm_token': fcmToken,
           'studentID': user.id ?? "null",
           'typeUserID': user.userTypeId ?? "null",
+          'studentName':user.username?? "null",
         }, SetOptions(merge: true));
   }
 }

@@ -116,70 +116,7 @@ class _LearningProcessItem extends State<LearningProcessItem> {
     );
   }
 
-  // Widget _saveButton(BuildContext context) {
-  //   return Consumer<ListLearningprocessProvider>(
-  //     builder: (context, value, child) {
-  //       return Container(
-  //           width: AppMainsize.mainWidth(context),
-  //           padding: const EdgeInsets.all(10),
-  //           color: AppColors.pageBackground,
-  //           child: GestureDetector(
-  //             onTap: isSaving
-  //                 ? null
-  //                 : () async {
-  //                   if (!mounted) return;
-  //                     setState(() {
-  //                       isSaving = true;
-  //                     });
-
-  //                     MyLearningProcess lp = MyLearningProcess(
-  //                         id: widget.learningProcess?.id,
-  //                         studentId: widget.student.id,
-  //                         title: titleController.text,
-  //                         comment: commentController.text,
-  //                         isPublish: isCheck ? "1" : "0",
-  //                         linkWeb: urlController.text,
-  //                         imgThumb: "",
-  //                         imgPath: "",
-  //                         dateCreated: widget.learningProcess?.dateCreated,
-  //                         isAlreadyAdd: widget.learningProcess?.isAlreadyAdd);
-
-  //                     MyLearningProcess mylp = await value.handleCheckAddUpdate(
-  //                         context, widget.student, lp);
-  //                     widget.learningProcess = mylp;
-
-  //                     setState(() {
-  //                       isSaving = false;
-  //                     });
-  //                   },
-  //             child: Container(
-  //               width: double.infinity,
-  //               height: footerHeight,
-  //               decoration: BoxDecoration(
-  //                   color: AppColors.primary,
-  //                   borderRadius: BorderRadius.circular(20)),
-  //               child: isSaving
-  //                   ? const Stack(
-  //                       children: [
-  //                         Center(
-  //                           child: CircularProgressIndicator(
-  //                             color: Colors.white,
-  //                           ),
-  //                         )
-  //                       ],
-  //                     )
-  //                   : Center(
-  //                       child: Text(
-  //                         AppLocalizations.of(context)
-  //                             .translate("learningprocess_save"),
-  //                         style: AppTextstyle.subWhiteTitleStyle,
-  //                       ),
-  //                     ),
-  //             ),
-  //           ));
-  //     },
-  //   );
-  // }
+  
 
 Widget _saveButton(BuildContext context) {
   return Consumer<ListLearningprocessProvider>(
@@ -188,48 +125,9 @@ Widget _saveButton(BuildContext context) {
         width: AppMainsize.mainWidth(context),
         padding: const EdgeInsets.all(10),
         color: AppColors.pageBackground,
-        child: GestureDetector(
-          onTap: isSaving
-              ? null
-              : () async {
-                  if (!mounted) return; // Kiểm tra widget còn tồn tại
-
-                  setState(() {
-                    isSaving = true;
-                  });
-
-                  try {
-                    MyLearningProcess lp = MyLearningProcess(
-                      id: widget.learningProcess?.id,
-                      studentId: widget.student.id,
-                      title: titleController.text,
-                      comment: commentController.text,
-                      isPublish: isCheck ? "1" : "0",
-                      linkWeb: urlController.text,
-                      imgThumb: "",
-                      imgPath: "",
-                      dateCreated: widget.learningProcess?.dateCreated,
-                      isAlreadyAdd: widget.learningProcess?.isAlreadyAdd,
-                    );
-
-                    MyLearningProcess mylp = await value.handleCheckAddUpdate(
-                        context, widget.student, lp);
-                    widget.learningProcess = mylp;
-
-                  } catch (e) {
-                    print("Lỗi khi lưu quá trình học: $e");
-                    AppMessage.errorMessage(
-                      context,
-                      AppLocalizations.of(context).translate("error_data"),
-                    );
-                  }
-
-                  if (mounted) {
-                    setState(() {
-                      isSaving = false;
-                    });
-                  }
-                },
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20), // Hiệu ứng bấm
+          onTap: isSaving ? null : _saveLearningProcess,
           child: Container(
             width: double.infinity,
             height: footerHeight,
@@ -237,28 +135,57 @@ Widget _saveButton(BuildContext context) {
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: isSaving
-                ? const Stack(
-                    children: [
-                      Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
-                      )
-                    ],
-                  )
-                : Center(
-                    child: Text(
+            child: Center(
+              child: isSaving
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text(
                       AppLocalizations.of(context).translate("learningprocess_save"),
                       style: AppTextstyle.subWhiteTitleStyle,
                     ),
-                  ),
+            ),
           ),
         ),
       );
     },
   );
 }
+
+void _saveLearningProcess() async {
+  setState(() => isSaving = true);
+
+  try {
+    MyLearningProcess lp = MyLearningProcess(
+      id: widget.learningProcess?.id,
+      studentId: widget.student.id,
+      title: titleController.text,
+      comment: commentController.text,
+      isPublish: isCheck ? "1" : "0",
+      linkWeb: urlController.text,
+      imgThumb: "",
+      imgPath: "",
+      dateCreated: widget.learningProcess?.dateCreated,
+      isAlreadyAdd: widget.learningProcess?.isAlreadyAdd,
+    );
+
+    MyLearningProcess mylp = await Provider.of<ListLearningprocessProvider>(
+      context,
+      listen: false,
+    ).handleCheckAddUpdate(context, widget.student, lp);
+
+    widget.learningProcess = mylp;
+  } catch (e, stacktrace) {
+    debugPrint("Lỗi khi lưu quá trình học: $e\nStacktrace: $stacktrace");
+    AppMessage.errorMessage(
+      context,
+      AppLocalizations.of(context).translate("error_data"),
+    );
+  }
+
+  if (mounted) {
+    setState(() => isSaving = false);
+  }
+}
+
 
   Widget _body(BuildContext context) {
     return SingleChildScrollView(

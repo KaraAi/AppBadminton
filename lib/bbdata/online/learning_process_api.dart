@@ -34,9 +34,12 @@ class LearningProcessApi {
               body: jsonEncode(body))
           .timeout(const Duration(seconds: 30));
 
-      return res.statusCode == 201;
+      print("📌 Response status: ${res.statusCode}");
+      print("📌 Response body: ${res.body}");
+      return res.statusCode == 200 || res.statusCode == 201;
+
     } catch (e) {
-      log("$e");
+      print("$e");
       return false;
     }
   }
@@ -57,7 +60,7 @@ class LearningProcessApi {
       };
 
       final res = await http
-          .put(
+          .patch(
               Uri.parse(
                   "$baseUrl/${dotenv.env["LEARNINGPROCESS_URL"]}/${int.parse(learningProcess.id!)}"),
               headers: {

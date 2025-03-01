@@ -11,9 +11,11 @@ import 'package:badminton_management_1/ccui/ccitem/learning_process_coach_item.d
 import 'package:badminton_management_1/ccui/ccresource/app_message.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:googleapis_auth/auth_io.dart';
 
 class LearningProcessControll {
 
@@ -60,10 +62,11 @@ class LearningProcessControll {
 }
 await handleUpdateLearningProcess(context, lp);
 
-      if(lp?.isAlreadyAdd==null){
+      if (lp?.isAlreadyAdd == null || lp?.isAlreadyAdd == false) {
         await handleAddLearningProcess(context, lp!);
         lp.savedLP();
-      }
+        print("✅ Đã gọi `savedLP()`, trạng thái: ${lp.isAlreadyAdd}");
+}
       else{
         // lp.id = mylp.id;
         // lp.dateCreated = mylp.dateCreated;
@@ -81,83 +84,12 @@ await handleUpdateLearningProcess(context, lp);
     }
   }
 
-  // Future<void> handleUpdateLearningProcess(BuildContext context, MyLearningProcess lp) async{
-  //   try{
-  //     if(lp.comment=="" || lp.title==""){
-  //       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_empty_inputlp"));
-  //       return;
-  //     }
-  //     else{
-  //       await messageHandler.handleAction(
-  //         context, 
-  //         () => LearningProcessApi().updateProcess(lp), 
-  //         "learningprocess_success", 
-  //         "learningprocess_error"
-  //       );
-  //     }
-  //   }
-  //   catch(e){
-  //     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
-  //   }
-  // }
 
-//  Future<void> handleUpdateLearningProcess(BuildContext context, MyLearningProcess lp) async {
-//   try {
-//     // Kiểm tra input rỗng
-//     if (lp.comment == null || lp.comment!.trim().isEmpty || lp.title == null || lp.title!.trim().isEmpty) {
-//       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_empty_inputlp"));
-//       return;
-//     }
 
-//     // Kiểm tra studentId hợp lệ
-//     if (lp.studentId == null || lp.studentId!.trim().isEmpty) {
-//       print("Error: studentId is null or empty");
-//       AppMessage.errorMessage(context, "Student ID is missing.");
-//       return;
-//     }
-
-//     String studentId = lp.studentId!.trim();
-
-//     // Gọi API update quá trình học
-//     bool success = await messageHandler.handleAction(
-//       context, 
-//       () => LearningProcessApi().updateProcess(lp), 
-//       "learningprocess_success", 
-//       "learningprocess_error"
-//     );
-
-//     if (success) {
-//       try {
-//         // Lấy token FCM của học viên từ Firestore
-//         DocumentSnapshot studentDoc = await FirebaseFirestore.instance
-//             .collection('users')
-//             .doc(studentId)
-//             .get();
-
-//         // Ép kiểu data để tránh lỗi key không tồn tại
-//         Map<String, dynamic>? userData = studentDoc.data() as Map<String, dynamic>?;
-
-//         String? fcmToken = userData?['fcm_token'];
-
-//         if (fcmToken != null && fcmToken.isNotEmpty) {
-//           await sendPushNotification(fcmToken, studentId);
-//         } else {
-//           print("Error: fcm_token not found for studentId: $studentId");
-//         }
-//       } catch (e) {
-//         print("Error fetching FCM token from Firestore: $e");
-//       }
-//     }
-//   } catch (e) {
-//     print("Error in handleUpdateLearningProcess: $e");
-//     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
-//   }
-// }
 Future<void> handleUpdateLearningProcess(BuildContext context, MyLearningProcess lp) async {
   try {
     // 🛑 Kiểm tra dữ liệu đầu vào
-    if ((lp.comment?.trim().isEmpty ?? true) || (lp.title?.trim().isEmpty ?? true))
- {
+    if ((lp.comment?.trim().isEmpty ?? true) || (lp.title?.trim().isEmpty ?? true)) {
       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_empty_inputlp"));
       return;
     }
@@ -167,48 +99,69 @@ Future<void> handleUpdateLearningProcess(BuildContext context, MyLearningProcess
       return;
     }
 
-    String studentId = lp.studentId!.trim();
+    String studentId = lp.studentId!.trim(); // 🔹 Firestore lưu `studentID` dưới dạng String
 
     // 🚀 Gọi API để cập nhật quá trình học
     bool success = await LearningProcessApi().updateProcess(lp);
+    if (!success) {
+      print("❌ API trả về thất bại! Kiểm tra lại dữ liệu.");
+      // AppMessage.errorMessage(context, "⚠️ API cập nhật thất bại, kiểm tra lại dữ liệu!");
+      return;
+    }
 
-    if (success) {
-      AppMessage.successMessage(context, AppLocalizations.of(context).translate("learningprocess_success"));
+    print("✅ API cập nhật quá trình học thành công!");
+    AppMessage.successMessage(context, AppLocalizations.of(context).translate("learningprocess_success"));
 
-      // 🔥 Lấy danh sách token của học viên từ Firestore
-      QuerySnapshot studentSnapshot = await FirebaseFirestore.instance
+    // 🔥 Lấy thông tin học viên từ Firestore (truy vấn bằng `String`)
+    String studentName = "Học viên"; // Giá trị mặc định
+    String? studentFcmToken;
+
+    try {
+      QuerySnapshot studentQuery = await FirebaseFirestore.instance
           .collection('users')
-          .where('studentID', isEqualTo: studentId) // Lọc theo studentID
-          .where('typeUserID', isEqualTo: "3") // Chỉ lấy học viên
+          .where('studentID', isEqualTo: studentId) // 🔹 Truy vấn bằng String
+          .limit(1)
           .get();
 
-      List<String> fcmTokens = [];
-      for (var doc in studentSnapshot.docs) {
-        var token = doc['fcm_token'];
-        if (token != null && token.isNotEmpty) {
-          fcmTokens.add(token);
-        }
-      }
+      if (studentQuery.docs.isNotEmpty) {
+        var data = studentQuery.docs.first.data() as Map<String, dynamic>;
+        print("🔥 Dữ liệu Firestore lấy được: $data");
 
-      // Nếu có học viên nhận thông báo, gửi FCM
-      if (fcmTokens.isNotEmpty) {
-        await sendFCMNotification(
-          fcmTokens,
-          "Cập nhật quá trình học",
-          "Quá trình học của bạn đã được cập nhật. Hãy kiểm tra ngay!",
-        );
+        studentName = data['studentName'] ?? "Học viên";
+        studentFcmToken = data['fcm_token'] as String?; // Lấy token FCM
+
+        if (studentFcmToken == null || studentFcmToken.isEmpty) {
+          print("⚠️ Không tìm thấy FCM token cho học viên ID: $studentId");
+        }
+      } else {
+        print("⚠️ Không tìm thấy học viên với studentID: $studentId");
+        return; // Không có học viên thì không gửi thông báo nữa
       }
-    } else {
-      AppMessage.errorMessage(context, AppLocalizations.of(context).translate("learningprocess_error"));
+    } catch (e) {
+      print("❌ Lỗi khi lấy dữ liệu Firestore: $e");
+      return;
+    }
+
+    // 📩 Gửi thông báo FCM nếu tìm thấy token
+    if (studentFcmToken != null && studentFcmToken.isNotEmpty) {
+      print("📩 Đang gửi FCM đến token: $studentFcmToken");
+      await sendFCMNotification(
+        [studentFcmToken],
+        "Cập nhật quá trình học",
+        "Huấn luyện viên đã cập nhật quá trình học của bạn, $studentName!",
+      );
     }
   } catch (e) {
     print("❌ Lỗi khi cập nhật quá trình học: $e");
     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
   }
 }
+
+
+
 Future<void> handleAddLearningProcess(BuildContext context, MyLearningProcess lp) async {
   try {
-    if ((lp.comment?.isEmpty?? true) || (lp.title?.isEmpty ?? true)) {
+    if ((lp.comment?.isEmpty ?? true) || (lp.title?.isEmpty ?? true)) {
       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_empty_inputlp"));
       return;
     }
@@ -216,7 +169,30 @@ Future<void> handleAddLearningProcess(BuildContext context, MyLearningProcess lp
     // 🟢 Gửi dữ liệu quá trình học lên server
     bool isSuccess = await LearningProcessApi().addProcess(lp);
     if (isSuccess) {
+      print("✅ Quá trình học đã được lưu thành công!");
       AppMessage.successMessage(context, AppLocalizations.of(context).translate("learningprocess_success"));
+
+      // 🔥 Lấy tên học viên từ Firestore
+      String studentName = "Học viên"; // Giá trị mặc định
+      String? studentFcmToken; // Token để gửi thông báo cho học viên
+      try {
+        QuerySnapshot studentQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .where('studentID', isEqualTo: lp.studentId) // Lọc theo studentID
+            .limit(1) // Lấy duy nhất 1 kết quả
+            .get();
+
+        if (studentQuery.docs.isNotEmpty) {
+          var data = studentQuery.docs.first.data() as Map<String, dynamic>;
+          studentName = data['studentName'] ?? "Học viên";
+          studentFcmToken = data['fcm_token']; // Lấy FCM token của học viên
+          print("🔥 Lấy được studentName: $studentName");
+        } else {
+          print("⚠️ Không tìm thấy học viên với studentID: ${lp.studentId}");
+        }
+      } catch (e) {
+        print("⚠️ Không thể lấy thông tin học viên từ Firestore: $e");
+      }
 
       // 🔥 Lấy danh sách quản lý (`typeUserID = "2"`) để gửi thông báo xác nhận
       QuerySnapshot managerSnapshot = await FirebaseFirestore.instance
@@ -232,102 +208,81 @@ Future<void> handleAddLearningProcess(BuildContext context, MyLearningProcess lp
         }
       }
 
-      // Nếu có quản lý nhận thông báo, gửi FCM
+      // 📩 Gửi thông báo FCM cho quản lý
       if (fcmTokens.isNotEmpty) {
         await sendFCMNotification(
           fcmTokens,
           "Xác nhận quá trình học",
-          "Huấn luyện viên đã thêm quá trình học cho học viên có ID: ${lp.studentId}",
+          "Huấn luyện viên đã thêm quá trình học cho học viên $studentName",
         );
       }
+
+      // 📩 Gửi thông báo FCM cho học viên
+      if (studentFcmToken != null && studentFcmToken.isNotEmpty) {
+        await sendFCMNotification(
+          [studentFcmToken],
+          "Cập nhật quá trình học",
+          "Huấn luyện viên đã cập nhật quá trình học của bạn!",
+        );
+      }
+
     } else {
+      print("❌ Lưu dữ liệu thất bại nhưng vẫn gửi lên server! Kiểm tra response.");
       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("learningprocess_error"));
     }
+
   } catch (e) {
     print("Lỗi: $e");
     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
   }
 }
 
-// 🔥 Gửi thông báo FCM đến danh sách token
 Future<void> sendFCMNotification(List<String> tokens, String title, String body) async {
-  const String serverKey = "c7295add2ba1bf9dbe2836b0d66da6f04c9c0760"; // 🔴 Thay bằng Server Key từ Firebase Cloud Messaging
+  const String projectId = "davidbadminton";
+  final String accessToken = await getAccessToken(); // 🔥 Lấy token tự động
 
-  final Uri fcmUrl = Uri.parse("https://fcm.googleapis.com/fcm/send");
+  final Uri fcmUrl = Uri.parse("https://fcm.googleapis.com/v1/projects/$projectId/messages:send");
 
-  final Map<String, dynamic> fcmPayload = {
-    "registration_ids": tokens, // Gửi đến nhiều token
-    "notification": {
-      "title": title,
-      "body": body,
-      "sound": "default"
-    },
-    "priority": "high"
-  };
+  for (String token in tokens) {
+    final Map<String, dynamic> fcmPayload = {
+      "message": {
+        "token": token, // Gửi từng token một
+        "notification": {
+          "title": title,
+          "body": body
+        }
+      }
+    };
 
-  final response = await http.post(
-    fcmUrl,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "key=$serverKey"
-    },
-    body: jsonEncode(fcmPayload),
-  );
+    final response = await http.post(
+      fcmUrl,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken"
+      },
+      body: jsonEncode(fcmPayload),
+    );
 
-  if (response.statusCode == 200) {
-    print("🔥 Gửi thông báo thành công!");
-  } else {
-    print("❌ Gửi thông báo thất bại: ${response.body}");
+    if (response.statusCode == 200) {
+      print("🔥 Thông báo gửi thành công đến: $token");
+    } else {
+      print("❌ Lỗi gửi FCM ($token): ${response.body}");
+    }
   }
 }
 
-  // Future<void> handleAddLearningProcess(BuildContext context, MyLearningProcess lp) async{
-  //   try{
-  //     if(lp.comment=="" || lp.title==""){
-  //       AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_empty_inputlp"));
-  //       return;
-  //     }
-  //     else{
-  //       await messageHandler.handleAction(
-  //         context, 
-  //         () => LearningProcessApi().addProcess(lp), 
-  //         "learningprocess_success", 
-  //         "learningprocess_error"
-  //       );
-  //     }
-  //   }
-  //   catch(e){
-  //     AppMessage.errorMessage(context, AppLocalizations.of(context).translate("error_data"));
-  //   }
-  // } 
-// Future<void> sendPushNotification(String fcmToken, String studentId) async {
-//   const String serverKey = 'c7295add2ba1bf9dbe2836b0d66da6f04c9c0760';
 
-//   try {
-//     await http.post(
-//       Uri.parse('https://fcm.googleapis.com/fcm/send'),
-//       headers: <String, String>{
-//         'Content-Type': 'application/json',
-//         'Authorization': 'key=$serverKey',
-//       },
-//       body: jsonEncode({
-//         'to': fcmToken,
-//         'notification': {
-//           'title': 'Thông báo từ HLV',
-//           'body': 'Huấn luyện viên vừa thêm quá trình học của $studentId. Hãy mở lên xem nào!',
-//           'sound': 'default'
-//         },
-//         'data': {
-//           'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-//           'id': '1',
-//           'status': 'done'
-//         },
-//       }),
-//     );
-//   } catch (e) {
-//     print("Lỗi gửi thông báo: $e");
-//   }
-// }
+
+Future<String> getAccessToken() async {
+  final serviceAccount = jsonDecode(await rootBundle.loadString('assets/service-account.json'));
+
+  final client = await clientViaServiceAccount(
+    ServiceAccountCredentials.fromJson(serviceAccount),
+    ['https://www.googleapis.com/auth/firebase.messaging'],
+  );
+
+  return client.credentials.accessToken.data;
+}
 
   
 }
