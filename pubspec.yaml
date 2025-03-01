@@ -56,7 +56,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true 
   ios: true
-  image_path: "assets/logo_icon/logo.png" 
+  image_path: "assets/logo_icon/logoBadminton.jpg"
   remove_alpha_ios: true
 
 flutter:
