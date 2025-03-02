@@ -22,28 +22,44 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "assets/.env");
   tz.initializeTimeZones();
+  
   LicenseRegistry.addLicense(() async* {
     final license =
         await rootBundle.loadString('google_fonts/Roboto/LICENSE.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
-await Firebase.initializeApp(
+
+  await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-);
+  );
+
   await FCMController().initToState().catchError((error) {
     print("Error initializing FCMController: $error");
   });
+
   HttpOverrides.global = MyHttpOverrides();
 
-  runApp(MainApp());
+  // ✅ Kiểm tra trạng thái đăng nhập
+  bool isLoggedIn = await checkLoginStatus();
+
+  runApp(MainApp(isLoggedIn: isLoggedIn));
 }
 
+// 📌 Hàm kiểm tra đăng nhập
+Future<bool> checkLoginStatus() async {
+  final prefs = await SharedPreferences.getInstance();
+  final String? userID = prefs.getString('code');
+  return userID != null && userID.isNotEmpty;
+}
+
+// ✅ Xử lý chứng chỉ SSL nếu cần
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -53,8 +69,11 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
+// ✅ MainApp cập nhật để xử lý điều hướng
 class MainApp extends StatefulWidget {
-  MainApp({super.key});
+  final bool isLoggedIn;
+
+  const MainApp({super.key, required this.isLoggedIn});
 
   @override
   State<MainApp> createState() => MainAppState();
@@ -62,7 +81,6 @@ class MainApp extends StatefulWidget {
 
 class MainAppState extends State<MainApp> {
   late FlutterLocalization localization;
-
   Locale _locale = const Locale('vi', 'VN');
 
   @override
@@ -72,39 +90,32 @@ class MainAppState extends State<MainApp> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ListStudentProvider()),
-        ChangeNotifierProvider(
-            create: (context) => ListRollcallcoachProvider()),
-        ChangeNotifierProvider(
-            create: (context) => ListRollcallStudentProvider()),
-        ChangeNotifierProvider(
-            create: (context) => ListLearningprocessProvider()),
+        ChangeNotifierProvider(create: (context) => ListRollcallcoachProvider()),
+        ChangeNotifierProvider(create: (context) => ListRollcallStudentProvider()),
+        ChangeNotifierProvider(create: (context) => ListLearningprocessProvider()),
         ChangeNotifierProvider(create: (context) => ListTuitionsProvider()),
         ChangeNotifierProvider(create: (context) => ListCoachProvider()),
       ],
       child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          locale: _locale,
-          supportedLocales: const [Locale('en', 'US'), Locale('vi', 'VN')],
-          localizationsDelegates: const [
-            AppLocalizationsDelegate(),
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          theme: ThemeData(
-              textTheme: GoogleFonts.robotoTextTheme(),
-              colorScheme:
-                  ColorScheme.fromSeed(seedColor: AppColors.pageBackground)),
-          home: FirstView()),
+        debugShowCheckedModeBanner: false,
+        locale: _locale,
+        supportedLocales: const [Locale('en', 'US'), Locale('vi', 'VN')],
+        localizationsDelegates: const [
+          AppLocalizationsDelegate(),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        theme: ThemeData(
+          textTheme: GoogleFonts.robotoTextTheme(),
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.pageBackground),
+        ),
+        //home: widget.isLoggedIn ? /home() : FirstView(), // ✅ Điều hướng dựa trên trạng thái đăng nhập
+        home: FirstView()),
     );
   }
 }

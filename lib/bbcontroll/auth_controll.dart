@@ -12,6 +12,7 @@ import 'package:badminton_management_1/ccui/ccresource/app_message.dart';
 import 'package:badminton_management_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AuthControll{
@@ -22,15 +23,22 @@ class AuthControll{
   final sessionManager = SessionManager();
 
   // Handle logout
-  Future<void> handleLogout(BuildContext context) async{
-    currentUser.logout();
-    sessionManager.stopSession();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => MainApp()),
-      (route) => false,
-    );
-  }
+  Future<void> handleLogout(BuildContext context) async {
+  // Xóa dữ liệu đăng nhập trong SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('userID');
+
+  // Đăng xuất người dùng
+  currentUser.logout();
+  sessionManager.stopSession();
+
+  // Chuyển về màn hình đăng nhập
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => MainApp(isLoggedIn: false)), // ✅ Sửa lỗi tại đây
+    (route) => false,
+  );
+}
 
   Future<bool> handleLogin(BuildContext context, {required MyUser user}) async {
   bool isLogin = await UserTypeContext.login(user);

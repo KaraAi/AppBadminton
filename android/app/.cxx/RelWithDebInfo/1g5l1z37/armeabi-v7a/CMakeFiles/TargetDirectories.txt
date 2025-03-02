@@ -1,0 +1,2 @@
+/Users/aikara/AppBadminton/android/app/.cxx/RelWithDebInfo/1g5l1z37/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/aikara/AppBadminton/android/app/.cxx/RelWithDebInfo/1g5l1z37/armeabi-v7a/CMakeFiles/rebuild_cache.dir

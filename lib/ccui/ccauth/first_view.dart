@@ -24,8 +24,8 @@ class _FirstView extends State<FirstView> {
 
   @override
   void initState() {
-    //userTypeStrategy = StudentStrategy();
-    userTypeStrategy = CoachStrategy();
+    userTypeStrategy = StudentStrategy();
+    //userTypeStrategy = CoachStrategy();
     super.initState();
   }
 
