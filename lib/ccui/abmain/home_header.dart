@@ -278,105 +278,93 @@ class _HomeHeaderView extends State<HomeHeaderView> {
   }
 
   Widget _titleWellcome(BuildContext context) {
-    return SizedBox(
-      width: AppMainsize.mainWidth(context),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+  return SizedBox(
+    width: AppMainsize.mainWidth(context),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start, // ✅ Tránh lỗi tràn chiều dọc
         children: [
-          //
-          Container(
-            width: AppMainsize.mainWidth(context),
-            padding: const EdgeInsets.only(left: 20, top: 20),
-            clipBehavior: Clip.none,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 70,
-                  height: 70,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: (currentUser.image == null ||
-                            currentUser.image!.isEmpty)
-                        ? Image.asset(
-                            currentUser
-                                .imageAssets!, // Hình ảnh mặc định nếu không có
-                            fit: BoxFit.cover,
-                          )
-                        : Image.memory(
-                            base64Decode(
-                              currentUser.image!
-                                  .split(',')
-                                  .last, // Loại bỏ prefix
-                            ),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                currentUser
-                                    .imageAssets!, // Hình ảnh mặc định nếu có lỗi
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          ),
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: AppMainsize.mainWidth(context) - 300,
-                      child: Text(
-                        AppLocalizations.of(context).translate("wellcome_home"),
-                        style: AppTextstyle.subWhiteTitleStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(
-                      width: AppMainsize.mainWidth(context) - 200,
-                      child: Text(
-                        AppFormat.removeParentheses(currentUser.username ?? ""),
-                        style: AppTextstyle.mainWhiteTitleStyle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+          // Avatar
+          SizedBox(
+            width: 60,
+            height: 60,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: (currentUser.image == null || currentUser.image!.isEmpty)
+                  ? Image.asset(
+                      currentUser.imageAssets!,
+                      fit: BoxFit.cover,
                     )
-                  ],
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                        color: AppColors.secondary,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Center(
-                      child: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              valueAnimate == 0
-                                  ? valueAnimate = -1
-                                  : valueAnimate = 0;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.settings,
-                            size: 20,
-                            color: Colors.white,
-                          )),
-                    ))
-              ],
+                  : Image.memory(
+                      base64Decode(currentUser.image!.split(',').last),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          currentUser.imageAssets!,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    ),
             ),
-          )
+          ),
+
+          const SizedBox(width: 10), // Khoảng cách nhỏ
+
+          // Phần văn bản chứa tên học viên
+          Expanded( // ✅ Dùng Expanded để chiếm đủ không gian
+            child: SingleChildScrollView( // ✅ Cho phép cuộn nếu nội dung dài
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // ✅ Đảm bảo nội dung không bị ép quá mức
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).translate("wellcome_home"),
+                    style: AppTextstyle.subWhiteTitleStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+
+                  // ✅ Hiển thị đầy đủ, không bị lỗi tràn
+                  Text(
+                    AppFormat.removeParentheses(currentUser.username ?? ""),
+                    style: AppTextstyle.mainWhiteTitleStyle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // Nút cài đặt
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColors.secondary,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  valueAnimate = valueAnimate == 0 ? -1 : 0;
+                });
+              },
+              icon: const Icon(Icons.settings, size: 20, color: Colors.white),
+            ),
+          ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildImageFromBase64(String base64String) {
     try {

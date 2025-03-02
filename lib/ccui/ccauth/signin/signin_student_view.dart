@@ -150,13 +150,16 @@ Widget _button(BuildContext context) {
             studentName: user.username,
           );
         }
-        // ✅ Chuyển hướng sang màn hình chính
-        Navigator.pushReplacementNamed(context, "/home");
-      }
-
-      setState(() {
-        isLoading = false;
-      });
+        // ✅ Kiểm tra widget còn tồn tại trước khi điều hướng
+         if (mounted && context.mounted) {
+           Navigator.pushReplacementNamed(context, "/home");
+           }
+    }
+    if (mounted) { // ✅ Tránh lỗi gọi `setState` sau khi widget bị hủy
+    setState(() {
+      isLoading = false;
+    });
+  }
     },
     child: Container(
       width: AppMainsize.mainWidth(context) - 100,
