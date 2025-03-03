@@ -48,7 +48,7 @@ class _RollcallStudentButton extends State<RollcallStudentButton>{
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${AppLocalizations.of(context).translate("rollcall")} ${widget.student.studentName ?? ""}",
+                      "${AppLocalizations.of(context).translate("rollCallStudent")} ${widget.student.studentName ?? ""}",
                       style: AppTextstyle.mainTitleStyle,
                     ),
                     const SizedBox(height: 10),

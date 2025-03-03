@@ -13,8 +13,11 @@ import 'package:badminton_management_1/bbdata/online/facility_api.dart';
 import 'package:badminton_management_1/bbdata/online/roll_call_api.dart';
 import 'package:badminton_management_1/bbdata/online/roll_call_coachs_api.dart';
 import 'package:badminton_management_1/ccui/ccresource/app_message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:geolocator/geolocator.dart';
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
@@ -32,89 +35,133 @@ class RollCallControll {
 
   // Student Roll Call --------------------------------------------------------
 
-  Future<void> handleSaveListRollCall(BuildContext context) async {
-    try {
-      bool isConnect = await connectionService.checkConnect();
-      await _processRollCallSave(context, isOnline: isConnect);
-    } catch (e) {
-      AppMessage.errorMessage(
-          context, AppLocalizations.of(context).translate("error_data"));
+Future<void> handleSaveListRollCall(BuildContext context) async {
+  try {
+    bool isConnect = await connectionService.checkConnect();
+    await _processRollCallSave(context, isOnline: isConnect);
+  } catch (e) {
+    AppMessage.errorMessage(
+        context, AppLocalizations.of(context).translate("error_data"));
+  }
+}
+
+// ✅ Xử lý điểm danh và gửi thông báo
+Future<void> _processRollCallSave(BuildContext context, {required bool isOnline}) async {
+  final studentProvider = Provider.of<ListStudentProvider>(context, listen: false);
+
+  bool? youSure = await _showConfirmationDialog(
+    context,
+    title: isOnline
+        ? AppLocalizations.of(context).translate("rollcall_check_save")
+        : AppLocalizations.of(context).translate("rollcall_check_save_local"),
+  );
+
+  if (youSure != true) return;
+
+  QuickAlert.show(context: context, type: QuickAlertType.loading, disableBackBtn: true);
+
+  Map<String, String> checkedStudents = {}; // id -> "1" (Đi học) hoặc "0" (Không đi học)
+  bool isAllSuccessful = true;
+
+  List<MyStudent> studentsToCheck = List<MyStudent>.from(studentProvider.lstUpdateIsCheck);
+
+  // ✅ Duyệt qua tất cả học viên cần cập nhật
+  for (var std in studentsToCheck) { 
+    String status = std.isCheck ?? "0"; // Mặc định là "0" nếu null (coi như không đi học)
+
+    bool isSaved = await _saveRollCallWithRetry(std, retryLimit: 3, isOnline: isOnline);
+
+    if (!isSaved) {
+      isAllSuccessful = false;
+    } else {
+      int index = studentProvider.lstUpdateIsCheck.indexWhere((student) => student.id == std.id);
+      studentProvider.deleteFromLstUpdate(index);
+      studentProvider.updateSavedRollCall(std);
+
+      checkedStudents[std.id!] = status; // ✅ Đảm bảo danh sách đúng định dạng ID -> Trạng thái
     }
   }
 
-  // Main function to handle both online and offline saves
-  Future<void> _processRollCallSave(BuildContext context,
-      {required bool isOnline}) async {
-    final studentProvider =
-        Provider.of<ListStudentProvider>(context, listen: false);
+  Navigator.pop(context);
 
-    bool? youSure = await _showConfirmationDialog(
+  await messageHandler.handleAction(
       context,
-      title: isOnline
-          ? AppLocalizations.of(context).translate("rollcall_check_save")
-          : AppLocalizations.of(context).translate("rollcall_check_save_local"),
-    );
+      () async => isAllSuccessful,
+      AppLocalizations.of(context).translate("success_save"),
+      AppLocalizations.of(context).translate("error_retry_failed"));
 
-    if (youSure != true) return;
+  // 🔥 Gửi thông báo sau khi lưu điểm danh
+  if (checkedStudents.isNotEmpty) {
+    await _sendNotificationToCheckedStudents(checkedStudents);
+  }
+}
 
-    //
-    QuickAlert.show(
-        context: context, type: QuickAlertType.loading, disableBackBtn: true);
-    List<MyStudent> studentsToCheck =
-        List<MyStudent>.from(studentProvider.lstUpdateIsCheck);
-    bool isAllSuccessful = true;
 
-    for (var std in studentsToCheck) {
-      bool isSaved = await _saveRollCallWithRetry(
-        std,
-        retryLimit: 3,
-        isOnline: isOnline,
-      );
 
-      if (!isSaved) {
-        isAllSuccessful = false;
-      } else {
-        int index = studentProvider.lstUpdateIsCheck
-            .indexWhere((student) => student.id == std.id);
-        studentProvider.deleteFromLstUpdate(index);
-        studentProvider.updateSavedRollCall(std);
-        // await RollCallDatabaseRepository().deleteItem(std.id!);
+// ✅ Gửi thông báo cho học viên có token hợp lệ từ Firestore
+Future<void> _sendNotificationToCheckedStudents(Map<String, String> checkedStudents) async {
+  try {
+    QuerySnapshot<Map<String, dynamic>> studentsSnapshot = await FirebaseFirestore.instance
+    .collection('users')
+    .where("studentID", whereIn: checkedStudents.keys.map((e) => e.toString()).toList()) 
+    .get();
+
+        print("📢 Danh sách ID cần tìm: ${checkedStudents.keys.toList()}");
+print("📢 Số lượng document lấy về: ${studentsSnapshot.docs.length}");
+
+    Map<String, String> studentTokens = {};
+    Map<String, String> studentIdMap = {}; 
+   for (var doc in studentsSnapshot.docs) {
+      String? fcmToken = doc['fcm_token'];
+      String? studentID = doc['studentID']; // 🔥 Lấy studentID đúng
+      if (studentID != null && fcmToken != null && fcmToken.trim().isNotEmpty) {
+        studentTokens[doc.id] = fcmToken;
+        studentIdMap[doc.id] = studentID.toString(); // 🔥 Lưu document ID -> student ID
       }
     }
-    Navigator.pop(context);
-    //
 
-    await messageHandler.handleAction(
-        context,
-        () async => isAllSuccessful,
-        AppLocalizations.of(context).translate("success_save"),
-        AppLocalizations.of(context).translate("error_retry_failed"));
+
+    // ✅ Gửi thông báo nếu có token hợp lệ
+    if (studentTokens.isNotEmpty) {
+      for (var entry in studentTokens.entries) {
+        String docId = entry.key; // Firestore Document ID
+        String token = entry.value;
+        String studentId = studentIdMap[docId] ?? "0"; // Lấy student ID đúng
+        String status = checkedStudents[studentId] ?? "0"; // Lấy trạng thái điểm danh
+
+        String statusMessage = status == "1" ? "Bạn đã đi học" : "Bạn đã vắng mặt";
+
+        print("📢 Gửi thông báo cho $studentId ($docId) - Trạng thái: $statusMessage");
+
+        await sendPushNotification([token], "Thông báo điểm danh", statusMessage);
+      }
+    } else {
+      print("⚠️ Không có token hợp lệ để gửi thông báo.");
+    }
+  } catch (e) {
+    print("❌ Lỗi khi lấy token từ Firestore hoặc gửi thông báo: $e");
   }
+}
 
-  // Helper function to show confirmation dialog
-  Future<bool?> _showConfirmationDialog(BuildContext context,
-      {required String title}) async {
-    return await QuickAlert.show(
-      context: context,
-      type: QuickAlertType.warning,
-      title: title,
-      showCancelBtn: true,
-      onConfirmBtnTap: () {
-        Future.microtask(() => Navigator.of(context).pop(true));
-      },
-      onCancelBtnTap: () {
-        Future.microtask(() => Navigator.of(context).pop(false));
-      },
-    );
-  }
 
-  // Retry logic for saving roll call (online or offline)
-  Future<bool> _saveRollCallWithRetry(MyStudent std,
-      {required int retryLimit, required bool isOnline}) async {
-    int retryCount = 0;
-    bool isSaved = false;
+// ✅ Hiển thị hộp thoại xác nhận
+Future<bool?> _showConfirmationDialog(BuildContext context, {required String title}) async {
+  return await QuickAlert.show(
+    context: context,
+    type: QuickAlertType.warning,
+    title: title,
+    showCancelBtn: true,
+    onConfirmBtnTap: () => Future.microtask(() => Navigator.of(context).pop(true)),
+    onCancelBtnTap: () => Future.microtask(() => Navigator.of(context).pop(false)),
+  );
+}
 
-    while (!isSaved && retryCount < retryLimit) {
+// ✅ Lưu điểm danh qua API với cơ chế retry
+Future<bool> _saveRollCallWithRetry(MyStudent std, {required int retryLimit, required bool isOnline}) async {
+  int retryCount = 0;
+  bool isSaved = false;
+
+  while (!isSaved && retryCount < retryLimit) {
       if (isOnline) {
         isSaved = await rollCallApi.rollCall(std.id!, std.isCheck ?? "1");
       }
@@ -124,8 +171,74 @@ class RollCallControll {
       await Future.delayed(const Duration(seconds: 1));
     }
 
-    return isSaved;
+  return isSaved;
+}
+
+
+
+Future<void> sendPushNotification(List<String> tokens, String title, String body) async {
+  if (tokens.isEmpty) {
+    print("❌ Không có token hợp lệ để gửi thông báo.");
+    return;
   }
+
+  const String projectId = "davidbadminton";
+  final String accessToken = await getAccessToken();
+
+  final Uri fcmUrl = Uri.parse("https://fcm.googleapis.com/v1/projects/$projectId/messages:send");
+
+  for (String token in tokens) {
+    try {
+      final response = await http.post(
+        fcmUrl,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken"
+        },
+        body: jsonEncode({
+          "message": {
+            "token": token,
+            "notification": {
+              "title": title,
+              "body": body
+            },
+            "android": {
+              "priority": "high"
+            },
+            "apns": {
+              "payload": {
+                "aps": {
+                  "sound": "default"
+                }
+              }
+            }
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("✅ Gửi thành công đến $token");
+      } else {
+        print("❌ Lỗi gửi FCM đến $token: ${response.body}");
+      }
+    } catch (e) {
+      print("❌ Lỗi khi gửi FCM: $e");
+    }
+  }
+}
+
+
+Future<String> getAccessToken() async {
+  final serviceAccount = jsonDecode(await rootBundle.loadString('assets/service-account.json'));
+
+  final client = await clientViaServiceAccount(
+    ServiceAccountCredentials.fromJson(serviceAccount),
+    ['https://www.googleapis.com/auth/firebase.messaging'],
+  );
+
+  return client.credentials.accessToken.data;
+}
+
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

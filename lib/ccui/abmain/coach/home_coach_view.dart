@@ -40,9 +40,6 @@ class _HomeCoachView extends State<HomeCoachView> {
 
   @override
   void initState() {
-    // notifyControll.checkRollCallCoachs(context);
-    // sessionManager.startSession(context);
-    // super.initState();
     super.initState();
 
     notifyControll.checkRollCallCoachs(context);
@@ -249,85 +246,6 @@ class _HomeCoachView extends State<HomeCoachView> {
       ),
     );
   }
-
-  // Widget _containerWeather(BuildContext context) {
-  //   return Container(
-  //     width: AppMainsize.mainWidth(context) - 100,
-  //     height: 200,
-  //     margin: const EdgeInsets.all(10),
-  //     clipBehavior: Clip.hardEdge,
-  //     decoration: BoxDecoration(
-  //         color: AppColors.pageBackground,
-  //         borderRadius: BorderRadius.circular(20),
-  //         border: Border.all(color: Colors.grey.withOpacity(0.5), width: 3)),
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.start,
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Expanded(
-  //           child: Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceAround,
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             children: [
-  //               //
-  //               Expanded(
-  //                   flex: 2,
-  //                   child: WeatherWidget(
-  //                       weatherCondition: currentWeather.main ?? "clear")),
-  //               const SizedBox(
-  //                 width: 15,
-  //               ),
-
-  //               //
-  //               Expanded(
-  //                 flex: 2,
-  //                 child: Column(
-  //                   mainAxisAlignment: MainAxisAlignment.center,
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Text(
-  //                       currentWeather.nameCity ?? 'Không xác định',
-  //                       style: AppTextstyle.subTitleStyle,
-  //                       maxLines: 2,
-  //                       overflow: TextOverflow.ellipsis,
-  //                     ),
-  //                     Text(
-  //                       'Nhiệt độ',
-  //                       style: AppTextstyle.contentGreySmallStyle,
-  //                       maxLines: 1,
-  //                       overflow: TextOverflow.ellipsis,
-  //                     ),
-  //                     Text(
-  //                       '${currentWeather.temp ?? 'N/A'} °C',
-  //                       style: AppTextstyle.subTitleStyle,
-  //                       maxLines: 1,
-  //                       overflow: TextOverflow.ellipsis,
-  //                     ),
-  //                     Text(
-  //                       'Thời tiết',
-  //                       style: AppTextstyle.contentGreySmallStyle,
-  //                       maxLines: 1,
-  //                       overflow: TextOverflow.ellipsis,
-  //                     ),
-  //                     Text(
-  //                       currentWeather.description ?? 'No description',
-  //                       style: AppTextstyle.subTitleStyle,
-  //                       maxLines: 2,
-  //                       overflow: TextOverflow.ellipsis,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               const SizedBox(
-  //                 width: 15,
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buttonRollCall(BuildContext context) {
     return Consumer<ListStudentProvider>(

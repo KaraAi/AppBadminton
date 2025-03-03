@@ -117,11 +117,6 @@ class ListStudentProvider with ChangeNotifier {
     try {
       _lstStudent.clear();
       _filterStudent.clear();
-
-      // _lstStudent = await StudentDatabaseRepository().getItems();
-      // _lstTime = await TimeDatabaseRepository().getItems();
-      // _lstRollCall = await RollCallDatabaseRepository().getItems();
-
       _mergeRollCallWithStudents();
     } catch (e) {
       log("$e");
@@ -142,14 +137,9 @@ class ListStudentProvider with ChangeNotifier {
           await studentApi.getListByCoachId(int.parse(currentUser.id!));
       _allStudents = await studentApi.getAllStudent();
       _lstRollCall = await rollCallApi.getListDate();
-      // List<MyRollCall> rcLocal = await RollCallDatabaseRepository().getItems();
-      // _mergeRollCalls(rcLocal);
       _lstTime = await timeApi.getList();
 
       _lstStudent = _lstStudent.where((std) => std.statusId == "3").toList();
-
-      // await _updateStudentChecksFromLocalRollCalls();
-      // await _saveToLocalDatabase();
       _mergeRollCallWithStudents();
       //     //filterListTimeID(_lstTime[0].id ?? "");
       if (_lstTime.isNotEmpty && _lstTime[0].id != null) {
@@ -164,41 +154,9 @@ class ListStudentProvider with ChangeNotifier {
     }
   }
 
-  // Future<void> setListOnline(Function onNoStudentFound) async {
-  //   _setLoadingState(true);
-  //   await Future.delayed(const Duration(seconds: 1));
-
-  //   try {
-  //     _lstStudent.clear();
-  //     _filterStudent.clear();
-  //     _allStudents.clear();
-
-  //     _allStudents = await studentApi.getAllStudent();
-  //     _lstStudent = _allStudents.where((std) => std.statusId == "3").toList();
-
-  //     _lstRollCall = await rollCallApi.getListDate();
-  //     _lstTime = await timeApi.getList();
-
-  //     _mergeRollCallWithStudents();
-
-  //     // Kiểm tra danh sách trước khi gọi filterListTimeID
-  //     if (_lstTime.isNotEmpty && _lstTime[0].id != null) {
-  //       filterListTimeID(_lstTime[0].id!, onNoStudentFound);
-  //     } else {
-  //       onNoStudentFound(); // Hiển thị SnackBar nếu không có khung giờ hợp lệ
-  //     }
-  //   } catch (e) {
-  //     log("$e");
-  //   } finally {
-  //     _setLoadingState(false);
-  //   }
-  // }
-
   Future<void> setListOnlineAllStudent(Function onNoStudentFound) async {
     _setLoadingState(true);
     await Future.delayed(const Duration(seconds: 1));
-    //_lstStudent = await studentApi.getListByCoachId(int.parse(currentUser.id!));
-    // Lưu lại danh sách gốc
     try {
       _lstStudent.clear();
       _filterStudent.clear();
@@ -213,7 +171,7 @@ class ListStudentProvider with ChangeNotifier {
       if (_lstTime.isNotEmpty && _lstTime[0].id != null) {
         filterListTimeID(_lstTime[0].id!, onNoStudentFound);
       } else {
-        onNoStudentFound(); // Hiển thị SnackBar nếu không có khung giờ hợp lệ
+        onNoStudentFound(); 
       }
     } catch (e) {
       log("$e");
@@ -229,55 +187,6 @@ class ListStudentProvider with ChangeNotifier {
       notifyListeners();
     });
   }
-
-  // Save to sqlite
-  // Future<void> _saveToLocalDatabase() async {
-  //   if (_lstStudent.isNotEmpty) {
-  //     await StudentDatabaseRepository().clearItem();
-  //     for (var student in _lstStudent) {
-  //       await StudentDatabaseRepository().addItem(student);
-  //     }
-  //   }
-
-  //   if (_lstTime.isNotEmpty) {
-  //     await TimeDatabaseRepository().clearItem();
-  //     for (var time in _lstTime) {
-  //       await TimeDatabaseRepository().addItem(time);
-  //     }
-  //   }
-  // }
-
-  // Update student checks based on local roll calls
-  // Future<void> _updateStudentChecksFromLocalRollCalls() async{
-  //   List<MyRollCall> rcs = await RollCallDatabaseRepository().getItems();
-  //   if(rcs.isNotEmpty){
-  //     for(var rc in rcs){
-  //       MyStudent? student = _lstStudent.firstWhere(
-  //         (std) => std.id == rc.studentId,
-  //       );
-
-  //       if (student.id != null) {
-  //         student.isCheck = rc.isCheck;
-  //         _lstUpdateIsCheck.add(student);
-  //       }
-  //     }
-  //   }
-  // }
-
-  // Merge roll calls with local data
-  // void _mergeRollCalls(List<MyRollCall> rcLocal) {
-  //   Map<String, MyRollCall> mergedRollCallMap = {};
-
-  //   for (var rollCall in _lstRollCall) {
-  //     mergedRollCallMap[rollCall.studentId!] = rollCall;
-  //   }
-
-  //   for (var rollCall in rcLocal) {
-  //     mergedRollCallMap[rollCall.studentId!] = rollCall;
-  //   }
-
-  //   _lstRollCall = mergedRollCallMap.values.toList();
-  // }
 
   // Merge rollCall data for isCheck of student
   void _mergeRollCallWithStudents() {
@@ -316,9 +225,6 @@ class ListStudentProvider with ChangeNotifier {
               .toLowerCase()
               .replaceAll(RegExp(r'\s+'), '')
               .contains(searchQueryTrimmed.toLowerCase().trim());
-      //  student.phone!.toLowerCase().replaceAll(RegExp(r'\s+'), '').contains(searchQueryTrimmed.toLowerCase().trim()) ||
-      //  student.email!.toLowerCase().replaceAll(RegExp(r'\s+'), '').contains(searchQueryTrimmed.toLowerCase().trim());
-
       final bool matchesTimeId =
           timeIdFilter == null || student.timeId == timeIdFilter;
 
@@ -326,27 +232,6 @@ class ListStudentProvider with ChangeNotifier {
     }).toList();
     notifyListeners();
   }
-
-  // For search
-  // void filterListSearch(String query) {
-  //   _searchQuery = query;
-  //   _filterList();
-  // }
-
-  // void filterListSearch(String query) {
-  //   _searchQuery = query.trim().toLowerCase();
-
-  //   if (_searchQuery.isEmpty) {
-  //     _filterStudent.clear();
-  //   } else {
-  //     _filterStudent = _allStudents.where((student) {
-  //       return student.studentName != null &&
-  //           student.studentName!.toLowerCase().contains(_searchQuery);
-  //     }).toList();
-  //   }
-
-  //   notifyListeners();
-  // }
 
   void filterListSearch(String query) {
     _searchQuery = query.trim().toLowerCase();
@@ -364,16 +249,6 @@ class ListStudentProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // For filter with timeId
-  // void filterListTimeID(String timeId, Function onNoStudentFound) {
-  //   timeIdFilter = timeId.isEmpty ? null : timeId;
-  //   _filterList();
-
-  //   // Kiểm tra nếu không có học viên trong khung giờ này
-  //   if (_filterStudent.isEmpty) {
-  //     onNoStudentFound(); // Gọi callback để hiển thị SnackBar
-  //   }
-  // }
   void filterListTimeID(String timeId, Function onNoStudentFound) {
     timeIdFilter = timeId.isEmpty ? null : timeId;
     // Lấy danh sách học viên từ lstStudent
