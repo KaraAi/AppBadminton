@@ -109,16 +109,39 @@ class _LearningProcessStudentItem extends State<LearningProcessStudentItem>{
     );
   }
 
-  Widget _buildYoutubeVideo(BuildContext context) {
-    return SizedBox(
-      width: AppMainsize.mainWidth(context),
-      height: 300,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: YoutubeItemView(videoUrl: widget.lp.linkWeb ?? ""),
-      ),
-    );
+  // Widget _buildYoutubeVideo(BuildContext context) {
+  //   return SizedBox(
+  //     width: AppMainsize.mainWidth(context),
+  //     height: 300,
+  //     child: ClipRRect(
+  //       borderRadius: BorderRadius.circular(20),
+  //       child: YoutubeItemView(videoUrl: widget.lp.linkWeb ?? ""),
+  //     ),
+  //   );
+  // }
+Widget _buildYoutubeVideo(BuildContext context) {
+  String formattedUrl = formatYoutubeUrl(widget.lp.youtubeVideo!.url ?? "");
+  print("Formatted YouTube URL: $formattedUrl");
+  
+  return SizedBox(
+    width: AppMainsize.mainWidth(context),
+    height: 300,
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: YoutubeItemView(videoUrl: formattedUrl),
+    ),
+  );
+}
+String formatYoutubeUrl(String url) {
+  if (url.contains("youtu.be/")) {
+    return url.replaceAll("youtu.be/", "www.youtube.com/watch?v=");
   }
+  if (!url.contains("watch?v=")) {
+    return url; // Giữ nguyên nếu đã đúng định dạng
+  }
+  return url;
+}
+
 
   Widget _styledContainer(
     BuildContext context, {

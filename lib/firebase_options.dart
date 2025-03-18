@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1025466942289',
     projectId: 'davidbadminton',
     storageBucket: 'davidbadminton.firebasestorage.app',
-    iosBundleId: 'com.quocbaosoftware.CoachDavidBadminton',
+    iosBundleId: 'com.quocbaosoftware.StudentDavidBadminton',
   );
 
 }

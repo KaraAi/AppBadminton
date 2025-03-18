@@ -141,7 +141,7 @@ class _HomeCoachView extends State<HomeCoachView> {
         return {
           "city": data["name"],
           "description": data["weather"][0]["description"],
-          "temperature": data["main"]["temp"],
+          "temperature": (data["main"]["temp"] as num).toDouble(),
           "icon": data["weather"][0]["icon"],
         };
       } else {

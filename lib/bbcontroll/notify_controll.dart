@@ -14,45 +14,6 @@ class NotifyControll {
   final RollCallControll rollCallControll = RollCallControll();
   final currentUser = MyCurrentUser();
 
-//   Future<void> checkRollCallCoachs(BuildContext context) async {
-//     try {
-//       bool isRollCall =
-//           await rollCallCoachesApi.checkByCoachsID(currentUser.id!);
-
-//       // Hiển thị dialog thông báo
-//       showDialog(
-//         context: context,
-//         builder: (BuildContext context) {
-//           return AlertDialog(
-//             title: Text(
-//               isRollCall
-//                   ? AppLocalizations.of(context).translate("rollcall_success")
-//                   : AppLocalizations.of(context).translate("rollcall_fail"),
-//               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//             ),
-//             // content: Text(
-//             //   isRollCall
-//             //       ? "Bạn đã chấm công thành công!"
-//             //       : "Bạn chưa chấm công. Hãy chấm công ngay!",
-//             //   style: TextStyle(fontSize: 16),
-//             // ),
-//             actions: [
-//               if (!isRollCall) // Nếu chưa chấm công, hiển thị nút chấm công
-//                 TextButton(
-//                   onPressed: () {
-//                     Navigator.pop(context); // Đóng hộp thoại
-//                   },
-//                   child: const Text("OK"),
-//                 ),
-//             ],
-//           );
-//         },
-//       );
-//     } catch (e) {
-//       log("❌ Lỗi kiểm tra chấm công: $e");
-//     }
-//   }
-// }
   Future<void> checkRollCallCoachs(BuildContext context) async {
     try {
       bool isRollCall =
@@ -65,31 +26,31 @@ class NotifyControll {
             title: Text(
               isRollCall
                   ? AppLocalizations.of(context)
-                      .translate("rollcall_success") // Đã điểm danh
+                      .translate("rollcall_success") 
                   : AppLocalizations.of(context)
-                      .translate("rollcall_fail"), // Chưa điểm danh
+                      .translate("rollcall_fail"), 
               style: AppTextstyle.mainTitleStyle,
             ),
             content: Text(
               isRollCall
-                  ? "Bạn đã chấm công hôm nay!" // Nếu đã điểm danh
-                  : "Bạn chưa chấm công. Hãy chấm công ngay!", // Nếu chưa điểm danh
+                  ? "Bạn đã chấm công hôm nay!" 
+                  : "Bạn chưa chấm công. Hãy chấm công ngay!", 
               style: const TextStyle(fontSize: 20),
             ),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // Đóng hộp thoại
+                  Navigator.pop(context); 
                 },
                 child: const Text(
                   "Hủy",
                   style: TextStyle(fontSize: 20),
                 ),
               ),
-              if (!isRollCall) // Nếu chưa điểm danh, thêm nút "Chấm công ngay"
+              if (!isRollCall) 
                 TextButton(
                   onPressed: () async {
-                    Navigator.pop(context); // Đóng hộp thoại trước
+                    Navigator.pop(context); 
                     await rollCallCoachesApi.rollCallCoachs(context);
                     // Gọi API điểm danh
                   },
