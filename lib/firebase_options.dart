@@ -50,20 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBAomu9vih0YB5-KgauGzsTzz9xoS6qeQc',
-    appId: '1:1025466942289:android:d1039b700fa8be51aac970',
-    messagingSenderId: '1025466942289',
-    projectId: 'davidbadminton',
-    storageBucket: 'davidbadminton.firebasestorage.app',
+    apiKey: 'AIzaSyBW-8RK6ryYFgaWZA2N-IgrgvecpI6mPco',
+    appId: '1:294483035603:android:3aafafc7a8b4a58f4c1b26',
+    messagingSenderId: '294483035603',
+    projectId: 'david-education-coach',
+    storageBucket: 'david-education-coach.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB1nctgWsAJstKVULoqAgZbMgRHOec5cnc',
-    appId: '1:1025466942289:ios:094a9198675b05e2aac970',
-    messagingSenderId: '1025466942289',
-    projectId: 'davidbadminton',
-    storageBucket: 'davidbadminton.firebasestorage.app',
-    iosBundleId: 'com.quocbaosoftware.StudentDavidBadminton',
+    apiKey: 'AIzaSyAJDycBBGIJ9c00TXyYO2SowbmGGNn_KNQ',
+    appId: '1:294483035603:ios:5944b296bbccdcc14c1b26',
+    messagingSenderId: '294483035603',
+    projectId: 'david-education-coach',
+    storageBucket: 'david-education-coach.firebasestorage.app',
+    iosBundleId: 'com.quocbaosoftware.CoachDavidBadminton',
   );
 
 }

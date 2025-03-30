@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Coach DavidBadminton</string>
+	<string>David Education Coach</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
@@ -41,9 +43,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your message to request permission</string>
+	<string>Ứng dụng cần quyền truy cập vị trí liên tục để cập nhật thông tin sân tập gần nhất và gửi thông báo liên quan.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your message to request permission</string>
+	<string>The app uses your location to provide accurate weather information and determine if you are at the badminton court to work.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

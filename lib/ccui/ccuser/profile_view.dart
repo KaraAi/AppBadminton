@@ -82,36 +82,6 @@ class _ProfileView extends State<ProfileView> {
     );
   }
 
-  // Widget _logoutSection() {
-  //   return Container(
-  //     margin: const EdgeInsets.only(bottom: 70),
-  //     child: ListTile(
-  //       onTap: () {
-  //         QuickAlert.show(
-  //           context: context,
-  //           type: QuickAlertType.warning,
-  //           disableBackBtn: true,
-  //           title: AppLocalizations.of(context).translate("warning_logout"),
-  //           showCancelBtn: true,
-  //           onConfirmBtnTap: () async {
-  //             Navigator.pop(context);
-  //             await AuthControll().handleLogout(context);
-  //           },
-  //         );
-  //       },
-  //       leading: Container(
-  //         padding: const EdgeInsets.all(10),
-  //         decoration: BoxDecoration(
-  //           color: Colors.red,
-  //           borderRadius: BorderRadius.circular(100),
-  //         ),
-  //         child: const Icon(Icons.logout, size: 25, color: Colors.white),
-  //       ),
-  //       title: Text("Log out", style: AppTextstyle.subRedTitleStyle),
-  //     ),
-  //   );
-  // }
-
   Widget _personalSection() {
     return Column(
       children: [

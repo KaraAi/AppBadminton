@@ -25,7 +25,7 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-    namespace = "com.quocbaosoftware.StudentDavidBadminton"
+    namespace = "com.quocbaosoftware.CoachDavidBadminton"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -40,7 +40,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.quocbaosoftware.StudentDavidBadminton"
+        applicationId = "com.quocbaosoftware.CoachDavidBadminton"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

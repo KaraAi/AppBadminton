@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyB1nctgWsAJstKVULoqAgZbMgRHOec5cnc</string>
+	<string>AIzaSyAJDycBBGIJ9c00TXyYO2SowbmGGNn_KNQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1025466942289</string>
+	<string>294483035603</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.quocbaosoftware.StudentDavidBadminton</string>
+	<string>com.quocbaosoftware.CoachDavidBadminton</string>
 	<key>PROJECT_ID</key>
-	<string>davidbadminton</string>
+	<string>david-education-coach</string>
 	<key>STORAGE_BUCKET</key>
-	<string>davidbadminton.firebasestorage.app</string>
+	<string>david-education-coach.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1025466942289:ios:094a9198675b05e2aac970</string>
+	<string>1:294483035603:ios:5944b296bbccdcc14c1b26</string>
 </dict>
 </plist>

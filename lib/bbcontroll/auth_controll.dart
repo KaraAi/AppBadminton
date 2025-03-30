@@ -57,22 +57,7 @@ class AuthControll{
   return isLogin; // Thêm return để có giá trị trả về
 }
 
-  // Handle login user type
-  // Future<void> handleLogin(BuildContext context, {required MyUser user}) async{
-
-  //   bool isLogin = await UserTypeContext.login(user);
-
-  //   await messageHandler.handleAction(
-  //     context,
-  //     () async => isLogin,
-  //     "success_login", 
-  //     "error_emailpass",
-  //   );
-
-  //   if (isLogin) {
-  //     UserTypeContext.navigateReplacement(context, "/home");
-  //   }
-  // }
+  
 
   // Handle update birthday student / coach
   Future<void> handleUpdateBirthday(BuildContext context, String birthday) async{

@@ -104,53 +104,110 @@ class _HomeCoachView extends State<HomeCoachView> {
         ));
   }
 
-  Widget _containerWeather(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _fetchWeatherData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildWeatherContainer("Đang tải...", "N/A", null, "01d");
-        } else if (snapshot.hasError || !snapshot.hasData) {
-          return _buildWeatherContainer(
-              "Không xác định", "Lỗi dữ liệu", null, "01d");
-        }
+  // Widget _containerWeather(BuildContext context) {
+  //   return FutureBuilder<Map<String, dynamic>>(
+  //     future: _fetchWeatherData(),
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return _buildWeatherContainer("Đang tải...", "N/A", null, "01d");
+  //       } else if (snapshot.hasError || !snapshot.hasData) {
+  //         return _buildWeatherContainer(
+  //             "Không xác định", "Lỗi dữ liệu", null, "01d");
+  //       }
 
-        var data = snapshot.data!;
+  //       var data = snapshot.data!;
+  //       return _buildWeatherContainer(
+  //         data["city"],
+  //         data["description"],
+  //         data["temperature"],
+  //         data["icon"],
+  //       );
+  //     },
+  //   );
+  // }
+Widget _containerWeather(BuildContext context) {
+  return FutureBuilder<Map<String, dynamic>>(
+    future: _fetchWeatherData(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return _buildWeatherContainer("Đang tải...", "N/A", null, "01d");
+      } else if (snapshot.hasError || snapshot.data == null) {
         return _buildWeatherContainer(
-          data["city"],
-          data["description"],
-          data["temperature"],
-          data["icon"],
-        );
-      },
-    );
-  }
-
-  Future<Map<String, dynamic>> _fetchWeatherData() async {
-    try {
-      Position position = await _determinePosition();
-      String apiKey =
-          "62c8370f658f2457db00ee12eaa5b07d"; // Thay bằng API Key của bạn
-      String url =
-          "https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric&lang=vi";
-
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        return {
-          "city": data["name"],
-          "description": data["weather"][0]["description"],
-          "temperature": (data["main"]["temp"] as num).toDouble(),
-          "icon": data["weather"][0]["icon"],
-        };
-      } else {
-        throw Exception("Lỗi khi tải dữ liệu thời tiết.");
+            "Không xác định", "Lỗi dữ liệu", null, "01d");
       }
-    } catch (e) {
-      return {}; // Trả về rỗng nếu có lỗi
+
+      var data = snapshot.data!;
+      return _buildWeatherContainer(
+        (data["city"] ?? "Không rõ").toString(),        // Kiểm tra null
+        (data["description"] ?? "Không có thông tin").toString(),
+        data["temperature"] ?? 0.0,                     // Đảm bảo giá trị số không bị null
+        (data["icon"] ?? "01d").toString(),
+      );
+    },
+  );
+}
+
+  // Future<Map<String, dynamic>> _fetchWeatherData() async {
+  //   try {
+  //     Position position = await _determinePosition();
+  //     String apiKey =
+  //         "62c8370f658f2457db00ee12eaa5b07d"; // Thay bằng API Key của bạn
+  //     String url =
+  //         "https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric&lang=vi";
+
+  //     final response = await http.get(Uri.parse(url));
+
+  //     if (response.statusCode == 200) {
+  //       var data = jsonDecode(response.body);
+  //       return {
+  //         "city": data["name"],
+  //         "description": data["weather"][0]["description"],
+  //         "temperature": (data["main"]["temp"] as num).toDouble(),
+  //         "icon": data["weather"][0]["icon"],
+  //       };
+  //     } else {
+  //       throw Exception("Lỗi khi tải dữ liệu thời tiết.");
+  //     }
+  //   } catch (e) {
+  //     return {}; // Trả về rỗng nếu có lỗi
+  //   }
+  // }
+  Future<Map<String, dynamic>> _fetchWeatherData() async {
+  try {
+    Position position = await _determinePosition();
+    String apiKey = "62c8370f658f2457db00ee12eaa5b07d";
+    String url =
+        "https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric&lang=vi";
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+
+      // Kiểm tra null trước khi trả về Map
+      return {
+        "city": (data["name"] ?? "Không rõ").toString(),
+        "description": (data["weather"] != null && data["weather"].isNotEmpty)
+            ? (data["weather"][0]["description"] ?? "Không có mô tả").toString()
+            : "Không có mô tả",
+        "temperature": (data["main"]?["temp"] as num?)?.toDouble() ?? 0.0,
+        "icon": (data["weather"] != null && data["weather"].isNotEmpty)
+            ? (data["weather"][0]["icon"] ?? "01d").toString()
+            : "01d",
+      };
+    } else {
+      throw Exception("Lỗi khi tải dữ liệu thời tiết.");
     }
+  } catch (e) {
+    return {
+      "city": "Không xác định",
+      "description": "Lỗi dữ liệu",
+      "temperature": 0.0,
+      "icon": "01d",
+    }; // Trả về dữ liệu mặc định thay vì Map rỗng
   }
+}
+
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();

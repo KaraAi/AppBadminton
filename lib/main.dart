@@ -24,7 +24,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "assets/.env");
@@ -40,24 +39,21 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await FCMController().initToState().catchError((error) {
-    print("Error initializing FCMController: $error");
-  });
-
+  await FCMController().initToState();
   HttpOverrides.global = MyHttpOverrides();
 
   // ✅ Kiểm tra trạng thái đăng nhập
-  bool isLoggedIn = await checkLoginStatus();
+  // bool isLoggedIn = await checkLoginStatus();
 
-  runApp(MainApp(isLoggedIn: isLoggedIn));
+  runApp(MainApp(isLoggedIn: true));
 }
 
 // 📌 Hàm kiểm tra đăng nhập
-Future<bool> checkLoginStatus() async {
-  final prefs = await SharedPreferences.getInstance();
-  final String? userID = prefs.getString('code');
-  return userID != null && userID.isNotEmpty;
-}
+// Future<bool> checkLoginStatus() async {
+//   final prefs = await SharedPreferences.getInstance();
+//   final String? userID = prefs.getString('userID');
+//   return userID != null && userID.isNotEmpty;
+// }
 
 // ✅ Xử lý chứng chỉ SSL nếu cần
 class MyHttpOverrides extends HttpOverrides {
@@ -114,8 +110,8 @@ class MainAppState extends State<MainApp> {
           textTheme: GoogleFonts.robotoTextTheme(),
           colorScheme: ColorScheme.fromSeed(seedColor: AppColors.pageBackground),
         ),
-        //home: widget.isLoggedIn ? /home() : FirstView(), // ✅ Điều hướng dựa trên trạng thái đăng nhập
-        home: FirstView()),
+        //home: widget.isLoggedIn ? HomeScreen() : FirstView()),
+         home: FirstView()),
     );
   }
 }

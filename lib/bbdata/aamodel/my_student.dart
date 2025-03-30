@@ -25,12 +25,12 @@ class MyStudent {
     typeUserID=e["typeUserID"].toString();
     timeId = e["timeId"].toString();
     studentName = e["studentName"].toString();
-    album = e["album"].toString();
-    images = e["images"].toString();
+    album = (e["album"] ?? e["album"]).toString();
+    images = (e["images"] ?? e["images"]).toString();
     birthday = e["birthday"].toString().split("T")[0];
-    phone = e["phone"].toString();
+    phone = (e["phone"] ?? e["phone"]).toString();
     password = e["password"].toString();
-    email = e["email"].toString();
+    email = (e["email"] ?? e["email"]).toString();
     gender = e["genderId"].toString();
     statusId = e["statusId"].toString();
   }

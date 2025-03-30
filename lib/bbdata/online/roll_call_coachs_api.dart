@@ -177,7 +177,7 @@ class RollCallCoachesApi {
 
 
 Future<void> sendPushNotification(List<String> tokens, String title, String body) async {
-  const String projectId = "davidbadminton";
+  const String projectId = "david-education-coach";
   final String accessToken = await getAccessToken(); // 🔥 Lấy token tự động
 
   final Uri fcmUrl = Uri.parse("https://fcm.googleapis.com/v1/projects/$projectId/messages:send");

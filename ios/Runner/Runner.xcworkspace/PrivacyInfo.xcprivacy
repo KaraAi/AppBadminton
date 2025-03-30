@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyAccessedAPICategories</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPICategory</key>
+            <string>SystemBootTime</string>
+        </dict>
+        <dict>
+            <key>NSPrivacyAccessedAPICategory</key>
+            <string>DiskSpace</string>
+        </dict>
+    </array>
+</dict>
+</plist>

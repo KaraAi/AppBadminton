@@ -24,8 +24,8 @@ class _FirstView extends State<FirstView> {
 
   @override
   void initState() {
-    userTypeStrategy = StudentStrategy();
-    //userTypeStrategy = CoachStrategy();
+    //userTypeStrategy = StudentStrategy();
+    userTypeStrategy = CoachStrategy();
     super.initState();
   }
 
@@ -39,30 +39,28 @@ class _FirstView extends State<FirstView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-          width: AppMainsize.mainWidth(context),
-          height: AppMainsize.mainHeight(context),
-          color: AppColors.pageBackground,
-          child: Stack(
-            children: [
-              Positioned(
-                  top: (AppMainsize.mainWidth(context) / 2) - 100,
-                  left: 10,
-                  right: 10,
-                  child: SizedBox(
-                    width: AppMainsize.mainWidth(context) - 50,
-                    child: Image.asset(
-                      "assets/logo_icon/logo.png",
-                      fit: BoxFit.contain,
-                    ),
-                  )),
-              Positioned(
-                  bottom: 70,
-                  left: 0,
-                  right: 0,
-                  child: LoadingAnimationWidget.inkDrop(
-                      color: AppColors.primary, size: 55))
-            ],
-          )),
+        width: AppMainsize.mainWidth(context),
+        height: AppMainsize.mainHeight(context),
+        color: AppColors.pageBackground,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // Căn giữa theo chiều dọc
+          children: [
+            // Logo
+            Image.asset(
+              "assets/logo_icon/logo.png",
+              width: AppMainsize.mainWidth(context) * 0.7, // Tự động co theo màn hình
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 30), // Khoảng cách giữa logo và vòng xoay
+            // Loading animation
+            LoadingAnimationWidget.inkDrop(
+              color: AppColors.primary,
+              size: 55,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+

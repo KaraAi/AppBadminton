@@ -119,7 +119,7 @@ Future<void> handleUpdateLearningProcess(BuildContext context, MyLearningProcess
     try {
       QuerySnapshot studentQuery = await FirebaseFirestore.instance
           .collection('users')
-          .where('studentID', isEqualTo: studentId) // 🔹 Truy vấn bằng String
+          .where('studentID', isEqualTo: studentId) 
           .limit(1)
           .get();
 
@@ -179,7 +179,7 @@ Future<void> handleAddLearningProcess(BuildContext context, MyLearningProcess lp
         QuerySnapshot studentQuery = await FirebaseFirestore.instance
             .collection('users')
             .where('studentID', isEqualTo: lp.studentId) // Lọc theo studentID
-            .limit(1) // Lấy duy nhất 1 kết quả
+            .limit(1) 
             .get();
 
         if (studentQuery.docs.isNotEmpty) {
@@ -238,7 +238,7 @@ Future<void> handleAddLearningProcess(BuildContext context, MyLearningProcess lp
 }
 
 Future<void> sendFCMNotification(List<String> tokens, String title, String body) async {
-  const String projectId = "davidbadminton";
+  const String projectId = "david-education-coach";
   final String accessToken = await getAccessToken(); // 🔥 Lấy token tự động
 
   final Uri fcmUrl = Uri.parse("https://fcm.googleapis.com/v1/projects/$projectId/messages:send");
@@ -246,7 +246,7 @@ Future<void> sendFCMNotification(List<String> tokens, String title, String body)
   for (String token in tokens) {
     final Map<String, dynamic> fcmPayload = {
       "message": {
-        "token": token, // Gửi từng token một
+        "token": token, 
         "notification": {
           "title": title,
           "body": body

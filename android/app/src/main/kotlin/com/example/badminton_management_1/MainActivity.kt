@@ -1,4 +1,4 @@
-package com.quocbaosoftware.StudentDavidBadminton
+package com.quocbaosoftware.CoachDavidBadminton
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -164,9 +164,11 @@ class _SignInView extends State<SignInCoachView> {
   }
 bool isLoading = false;
 
+
 Widget _button(BuildContext context) {
   return GestureDetector(
     onTap: () async {
+      if (!mounted) return; // Kiểm tra nếu widget đã bị huỷ
       setState(() {
         isLoading = true;
       });
@@ -177,23 +179,26 @@ Widget _button(BuildContext context) {
       );
 
       bool loginSuccess = await AuthControll().handleLogin(context, user: user);
+      
+      if (!mounted) return; // Kiểm tra trước khi gọi setState
+
       if (loginSuccess) {
         // Gán giá trị từ MyCurrentUser để đảm bảo có dữ liệu
-        user.id = MyCurrentUser().id;
-        user.userTypeId = MyCurrentUser().userTypeId;
-        user.username = MyCurrentUser().username; 
+        user.id = MyCurrentUser().id ?? "unknown_id";
+        user.userTypeId = MyCurrentUser().userTypeId ?? "unknown_type";
+        user.username = MyCurrentUser().username ?? "unknown_user";
 
         String? fcmToken = await FirebaseMessaging.instance.getToken();
-        if (fcmToken != null) {
+        if (fcmToken != null && fcmToken.isNotEmpty) {
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.username)
-              .set({
+              .set({  
                 'fcm_token': fcmToken,
                 'userID': user.id ?? "null",
                 'typeUserID': user.userTypeId ?? "null",
+                'nameUser': user.username ?? "null",
               }, SetOptions(merge: true));
-
           print("Firebase cập nhật thành công!");
         } else {
           print("Không lấy được FCM token");
@@ -202,6 +207,7 @@ Widget _button(BuildContext context) {
         print("Đăng nhập thất bại");
       }
 
+      if (!mounted) return; // Kiểm tra lại trước khi gọi setState
       setState(() {
         isLoading = false;
       });
@@ -224,5 +230,6 @@ Widget _button(BuildContext context) {
     ),
   );
 }
+
 
 }

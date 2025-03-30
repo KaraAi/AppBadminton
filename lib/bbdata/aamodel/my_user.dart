@@ -37,18 +37,18 @@ class MyUser {
     } else {
       id = e["coachId"].toString();
     }
-    email = e["email"].toString();
-    password = e["password"].toString();
-    username = (e["coachName"] ?? e["studentName"]).toString();
-    linkURL = (e["lessonPlan"] ?? e["album"]).toString();
-    image = e["images"].toString();
-    gender = e["genderId"].toString();
-    phone = e["phone"].toString();
-    birthday = e["birthday"].toString();
-    startDay = (e["workingStart"] ?? e["studyStart"]).toString();
-    code = e["studentCode"].toString();
-    tuitions = e["tuitions"] != null ? e["tuitions"].toString() : "";
-    userTypeId = e["typeUserId"] != null ? e["typeUserId"].toString() : "";
+  email = (e["email"] ?? "").toString();
+password = (e["password"] ?? "").toString();
+username = (e["coachName"] ?? e["studentName"] ?? "").toString();
+linkURL = (e["lessonPlan"] ?? "").toString();
+image = (e["images"] ?? "").toString();
+gender = (e["genderId"] ?? "").toString();
+phone = (e["phone"] ?? "").toString();
+birthday = (e["birthday"] ?? "").toString();
+startDay = (e["workingStart"] ?? e["studyStart"] ?? "").toString();
+code = (e["studentCode"] ?? "").toString();
+tuitions = (e["tuitions"] ?? "").toString();
+userTypeId = (e["typeUserId"] ?? "").toString();
   }
 }
 
@@ -114,3 +114,4 @@ class MyCurrentUser extends MyUser {
     tuitions = null;
   }
 }
+

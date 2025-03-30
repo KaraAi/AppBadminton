@@ -21,6 +21,8 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class RollCallControll {
   final RollCallCoachesApi rollCallCoachesApi = RollCallCoachesApi();
@@ -99,15 +101,61 @@ Future<void> _processRollCallSave(BuildContext context, {required bool isOnline}
 
 
 // ✅ Gửi thông báo cho học viên có token hợp lệ từ Firestore
+// Future<void> _sendNotificationToCheckedStudents(Map<String, String> checkedStudents) async {
+//   try {
+//     QuerySnapshot<Map<String, dynamic>> studentsSnapshot = await FirebaseFirestore.instance
+//     .collection('users')
+//     .where("studentID", whereIn: checkedStudents.keys.map((e) => e.toString()).toList()) 
+//     .get();
+
+//         print("📢 Danh sách ID cần tìm: ${checkedStudents.keys.toList()}");
+//         print("📢 Số lượng document lấy về: ${studentsSnapshot.docs.length}");
+
+//     Map<String, String> studentTokens = {};
+//     Map<String, String> studentIdMap = {}; 
+//    for (var doc in studentsSnapshot.docs) {
+//       String? fcmToken = doc['fcm_token'];
+//       String? studentID = doc['studentID']; // 🔥 Lấy studentID đúng
+//       if (studentID != null && fcmToken != null && fcmToken.trim().isNotEmpty) {
+//         studentTokens[doc.id] = fcmToken;
+//         studentIdMap[doc.id] = studentID.toString(); // 🔥 Lưu document ID -> student ID
+//       }
+//     }
+
+
+//     // ✅ Gửi thông báo nếu có token hợp lệ
+//     if (studentTokens.isNotEmpty) {
+//       for (var entry in studentTokens.entries) {
+//         String docId = entry.key; // Firestore Document ID
+//         String token = entry.value;
+//         String studentId = studentIdMap[docId] ?? "0"; // Lấy student ID đúng
+//         String status = checkedStudents[studentId] ?? "0"; // Lấy trạng thái điểm danh
+
+//         String statusMessage = status == "1" ? "Bạn đã đi học" : "Bạn đã vắng mặt";
+
+//         print("📢 Gửi thông báo cho $studentId ($docId) - Trạng thái: $statusMessage");
+
+//         await sendPushNotification([token], "Thông báo điểm danh", statusMessage);
+//       }
+//     } else {
+//       print("⚠️ Không có token hợp lệ để gửi thông báo.");
+//     }
+//   } catch (e) {
+//     print("❌ Lỗi khi lấy token từ Firestore hoặc gửi thông báo: $e");
+//   }
+
+  
+// }
+
 Future<void> _sendNotificationToCheckedStudents(Map<String, String> checkedStudents) async {
-  try {
+   try {
     QuerySnapshot<Map<String, dynamic>> studentsSnapshot = await FirebaseFirestore.instance
     .collection('users')
     .where("studentID", whereIn: checkedStudents.keys.map((e) => e.toString()).toList()) 
     .get();
 
         print("📢 Danh sách ID cần tìm: ${checkedStudents.keys.toList()}");
-print("📢 Số lượng document lấy về: ${studentsSnapshot.docs.length}");
+        print("📢 Số lượng document lấy về: ${studentsSnapshot.docs.length}");
 
     Map<String, String> studentTokens = {};
     Map<String, String> studentIdMap = {}; 
@@ -138,11 +186,65 @@ print("📢 Số lượng document lấy về: ${studentsSnapshot.docs.length}")
     } else {
       print("⚠️ Không có token hợp lệ để gửi thông báo.");
     }
+  
+
+   
+String trainerName = "Huấn luyện viên"; // Giá trị mặc định
+  List<String> fcmTokens = [];
+ String ? trainerTokens;
+  try {
+    // 🔍 Lấy thông tin Trainer (người gửi thông báo) - typeUserID = 1
+      QuerySnapshot trainerQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .where('typeUserID', isEqualTo: "1")
+            .get();
+
+    if (trainerQuery.docs.isNotEmpty) {
+      var data =  trainerQuery.docs.first.data() as Map<String, dynamic>;
+
+      if (data.containsKey('nameUser') && data['nameUser'] != null) {
+        trainerName = data['nameUser']; 
+         trainerTokens = data['fcm_token']; // Lấy FCM token của huấn luyện viên// ✅ Lấy đúng tên trainer đang dùng app
+      }
+
+      print("🔥 Người gửi thông báo: $trainerName");
+    } 
+
+
+    // 🔍 Lấy danh sách quản lý (typeUserID = 2) để gửi thông báo
+    QuerySnapshot managerQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('typeUserID', isEqualTo: "2")
+        .get();
+
+    for (var doc in managerQuery.docs) {
+      var userData = doc.data() as Map<String, dynamic>;
+
+      if (userData.containsKey('fcm_token') && userData['fcm_token'] != null) {
+        fcmTokens.add(userData['fcm_token']);
+      }
+    }
+
+    print("📢 Danh sách token FCM của quản lý: $fcmTokens");
+
+  } catch (e) {
+    print("❌ Lỗi khi lấy dữ liệu từ Firestore: $e");
+  }
+
+  // ✅ Gửi thông báo nếu có người nhận
+  if (fcmTokens.isNotEmpty) {
+    String managerMessage = "$trainerName đã điểm danh học viên.";
+    print("📢 Gửi thông báo cho quản lý - Nội dung: $managerMessage");
+
+    await sendPushNotification(fcmTokens, "Thông báo điểm danh", managerMessage);
+  } else {
+    print("⚠️ Không có quản lý nào có token hợp lệ để nhận thông báo.");
+  }
+
   } catch (e) {
     print("❌ Lỗi khi lấy token từ Firestore hoặc gửi thông báo: $e");
   }
 }
-
 
 // ✅ Hiển thị hộp thoại xác nhận
 Future<bool?> _showConfirmationDialog(BuildContext context, {required String title}) async {
@@ -182,7 +284,7 @@ Future<void> sendPushNotification(List<String> tokens, String title, String body
     return;
   }
 
-  const String projectId = "davidbadminton";
+  const String projectId = "david-education-coach";
   final String accessToken = await getAccessToken();
 
   final Uri fcmUrl = Uri.parse("https://fcm.googleapis.com/v1/projects/$projectId/messages:send");
